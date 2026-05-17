@@ -1,0 +1,324 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Taskbar Todolist - UX Design Directions</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --page: #f7f7f5;
+      --ink: #1f2328;
+      --muted: #6b6f76;
+      --line: #d8d8d2;
+      --focus: #2563eb;
+      --danger: #dc2626;
+      --danger-bg: #fee2e2;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--page);
+      color: var(--ink);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-size: 14px;
+      line-height: 1.4;
+    }
+    main {
+      width: min(1180px, calc(100vw - 32px));
+      margin: 0 auto;
+      padding: 24px 0 40px;
+    }
+    h1 {
+      margin: 0 0 4px;
+      font-size: 22px;
+      line-height: 30px;
+      font-weight: 650;
+      letter-spacing: 0;
+    }
+    .intro {
+      margin: 0 0 20px;
+      color: var(--muted);
+      max-width: 760px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(330px, 1fr));
+      gap: 18px;
+    }
+    .direction {
+      min-width: 0;
+    }
+    .direction h2 {
+      margin: 0 0 4px;
+      font-size: 15px;
+      line-height: 22px;
+      font-weight: 650;
+    }
+    .direction p {
+      margin: 0 0 10px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 18px;
+    }
+    .desktop {
+      height: 360px;
+      border: 1px solid #d7d7d0;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.86), rgba(255,255,255,.64)),
+        repeating-linear-gradient(90deg, #ecece8 0 1px, transparent 1px 80px);
+      position: relative;
+      overflow: hidden;
+    }
+    .bar {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 38px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 8px;
+      padding: 0 12px;
+      background: rgba(31,35,40,.92);
+    }
+    .tray-icon {
+      width: 24px;
+      height: 24px;
+      border-radius: 6px;
+      display: grid;
+      place-items: center;
+      background: #f4f4f5;
+      color: #1f2328;
+      font-size: 13px;
+      font-weight: 700;
+    }
+    .panel {
+      position: absolute;
+      right: 12px;
+      bottom: 48px;
+      width: 348px;
+      max-height: 282px;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      background: #fff;
+      box-shadow: 0 18px 42px rgba(20, 24, 32, .18), 0 2px 8px rgba(20,24,32,.08);
+      overflow: hidden;
+    }
+    .input {
+      display: flex;
+      align-items: center;
+      height: 42px;
+      padding: 0 12px;
+      border-bottom: 1px solid var(--line);
+      gap: 8px;
+    }
+    .input span {
+      color: var(--muted);
+    }
+    .input strong {
+      flex: 1;
+      font-weight: 500;
+    }
+    .focus {
+      box-shadow: inset 0 0 0 2px var(--focus);
+      border-radius: 6px;
+    }
+    .tasks {
+      max-height: 198px;
+      overflow: auto;
+      padding: 4px;
+    }
+    .task {
+      display: flex;
+      align-items: center;
+      min-height: 36px;
+      padding: 0 6px 0 8px;
+      border-radius: 6px;
+      gap: 8px;
+    }
+    .task:hover, .task.is-hover {
+      background: #f0f2f4;
+    }
+    .task .text {
+      flex: 1;
+      min-width: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .trash {
+      width: 30px;
+      height: 30px;
+      border: 0;
+      border-radius: 6px;
+      background: transparent;
+      color: var(--danger);
+      font-size: 16px;
+      cursor: default;
+    }
+    .trash:hover, .is-hover .trash {
+      background: var(--danger-bg);
+    }
+    .empty {
+      padding: 22px 14px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .mini-status {
+      padding: 6px 10px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .compact .panel { width: 320px; }
+    .compact .input { height: 38px; }
+    .compact .task { min-height: 32px; }
+    .borderless .panel {
+      border: 0;
+      border-radius: 10px;
+    }
+    .borderless .input {
+      margin: 8px;
+      height: 38px;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+    }
+    .borderless .tasks { padding: 0 8px 8px; }
+    .dark .desktop {
+      background: #1e1f22;
+      border-color: #3a3b40;
+    }
+    .dark .panel {
+      background: #26272b;
+      border-color: #3a3b40;
+      color: #f4f4f5;
+    }
+    .dark .input, .dark .mini-status { border-color: #3a3b40; }
+    .dark .input span, .dark .mini-status, .dark .empty { color: #b4b7be; }
+    .dark .task:hover, .dark .task.is-hover { background: #303137; }
+    .dark .trash { color: #f87171; }
+    .dark .trash:hover, .dark .is-hover .trash { background: #3b1f24; }
+    .quiet .trash { opacity: .45; }
+    .quiet .task:hover .trash, .quiet .is-hover .trash { opacity: 1; }
+    .outlined .task {
+      border-bottom: 1px solid #eee;
+      border-radius: 0;
+    }
+    .outlined .task:last-child { border-bottom: 0; }
+    .outlined .task:hover { background: #fafafa; }
+    code {
+      font: inherit;
+      padding: 1px 5px;
+      border-radius: 4px;
+      background: #e9eefb;
+      color: #1d4ed8;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Taskbar Todolist - directions visuelles</h1>
+    <p class="intro">Toutes les directions gardent la même interaction: icône tray, input en haut, <code>Entrée</code> pour ajouter, liste dessous, poubelle à droite de chaque tâche.</p>
+
+    <section class="grid">
+      <article class="direction compact">
+        <h2>1. Compact Native</h2>
+        <p>Recommandé: dense, lisible, très proche d'un utilitaire système.</p>
+        <div class="desktop">
+          <div class="panel">
+            <div class="input focus"><span>+</span><strong>Ajouter une tâche</strong><span>Entrée</span></div>
+            <div class="tasks">
+              <div class="task is-hover"><span class="text">Acheter du pain</span><button class="trash">🗑</button></div>
+              <div class="task"><span class="text">Répondre au mail de Lucas</span><button class="trash">🗑</button></div>
+              <div class="task"><span class="text">Préparer le dépôt GitHub mobile</span><button class="trash">🗑</button></div>
+              <div class="task"><span class="text">Tester le prototype Tauri tray</span><button class="trash">🗑</button></div>
+            </div>
+          </div>
+          <div class="bar"><div class="tray-icon">✓</div></div>
+        </div>
+      </article>
+
+      <article class="direction borderless">
+        <h2>2. Soft Floating</h2>
+        <p>Plus doux, mais un peu moins natif; utile si le panneau doit paraître plus moderne.</p>
+        <div class="desktop">
+          <div class="panel">
+            <div class="input"><span>+</span><strong>Ajouter une tâche</strong><span>↵</span></div>
+            <div class="tasks">
+              <div class="task"><span class="text">Acheter du pain</span><button class="trash">🗑</button></div>
+              <div class="task is-hover"><span class="text">Répondre au mail de Lucas</span><button class="trash">🗑</button></div>
+              <div class="task"><span class="text">Préparer le dépôt GitHub mobile</span><button class="trash">🗑</button></div>
+            </div>
+          </div>
+          <div class="bar"><div class="tray-icon">✓</div></div>
+        </div>
+      </article>
+
+      <article class="direction dark">
+        <h2>3. Dark Utility</h2>
+        <p>Version sombre; bonne compatibilité avec un environnement Linux dark.</p>
+        <div class="desktop">
+          <div class="panel">
+            <div class="input focus"><span>+</span><strong>Ajouter une tâche</strong><span>Entrée</span></div>
+            <div class="tasks">
+              <div class="task"><span class="text">Acheter du pain</span><button class="trash">🗑</button></div>
+              <div class="task is-hover"><span class="text">Répondre au mail de Lucas</span><button class="trash">🗑</button></div>
+              <div class="task"><span class="text">Préparer le dépôt GitHub mobile</span><button class="trash">🗑</button></div>
+            </div>
+          </div>
+          <div class="bar"><div class="tray-icon">✓</div></div>
+        </div>
+      </article>
+
+      <article class="direction quiet compact">
+        <h2>4. Quiet Delete</h2>
+        <p>Poubelle plus discrète, révélée au hover; calme mais moins découvrable.</p>
+        <div class="desktop">
+          <div class="panel">
+            <div class="input"><span>+</span><strong>Ajouter une tâche</strong><span>Entrée</span></div>
+            <div class="tasks">
+              <div class="task"><span class="text">Acheter du pain</span><button class="trash">🗑</button></div>
+              <div class="task is-hover"><span class="text">Répondre au mail de Lucas</span><button class="trash">🗑</button></div>
+              <div class="task"><span class="text">Préparer le dépôt GitHub mobile</span><button class="trash">🗑</button></div>
+            </div>
+          </div>
+          <div class="bar"><div class="tray-icon">✓</div></div>
+        </div>
+      </article>
+
+      <article class="direction outlined">
+        <h2>5. Clear Rows</h2>
+        <p>Séparateurs visibles; plus lisible si la liste devient longue.</p>
+        <div class="desktop">
+          <div class="panel">
+            <div class="input focus"><span>+</span><strong>Ajouter une tâche</strong><span>Entrée</span></div>
+            <div class="tasks">
+              <div class="task"><span class="text">Acheter du pain</span><button class="trash">🗑</button></div>
+              <div class="task is-hover"><span class="text">Répondre au mail de Lucas</span><button class="trash">🗑</button></div>
+              <div class="task"><span class="text">Préparer le dépôt GitHub mobile</span><button class="trash">🗑</button></div>
+              <div class="task"><span class="text">Tester le prototype Tauri tray</span><button class="trash">🗑</button></div>
+            </div>
+          </div>
+          <div class="bar"><div class="tray-icon">✓</div></div>
+        </div>
+      </article>
+
+      <article class="direction">
+        <h2>6. Empty State</h2>
+        <p>Etat sans tâche: l'input reste prioritaire; aucun onboarding lourd.</p>
+        <div class="desktop">
+          <div class="panel">
+            <div class="input focus"><span>+</span><strong>Ajouter une tâche</strong><span>Entrée</span></div>
+            <div class="empty">Aucune tâche active</div>
+            <div class="mini-status">Stocké localement</div>
+          </div>
+          <div class="bar"><div class="tray-icon">✓</div></div>
+        </div>
+      </article>
+    </section>
+  </main>
+</body>
+</html>
