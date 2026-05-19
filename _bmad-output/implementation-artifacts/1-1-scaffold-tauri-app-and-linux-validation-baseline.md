@@ -1,6 +1,6 @@
 # Story 1.1: Scaffold Tauri App and Linux Validation Baseline
 
-Status: ready-for-dev
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -19,25 +19,29 @@ so that implementation starts from the agreed architecture and proves the target
 
 ## Tasks / Subtasks
 
-- [ ] Scaffold the app with the official Tauri Vanilla TypeScript starter. (AC: 1)
-  - [ ] Use the project root as the final app root; avoid creating a nested app directory that leaves the repo root as a wrapper.
-  - [ ] Select `TypeScript / JavaScript`, `pnpm`, `Vanilla`, and `TypeScript`.
-  - [ ] Preserve existing BMad artifacts, docs, and repo history while replacing only obsolete placeholder scaffold files as needed.
-- [ ] Install and verify baseline dependencies. (AC: 2, 4)
-  - [ ] Run dependency installation with `pnpm`.
-  - [ ] Verify the Tauri dev command starts or reaches the next actionable missing-system-dependency error.
-  - [ ] Do not add React, Vue, Svelte, Tailwind, SQLite, SQLx, sync, backend, mobile, cloud, account, or Node ORM dependencies in this story.
-- [ ] Document the local development command and Linux validation baseline. (AC: 2, 3)
-  - [ ] Update the root README so it reflects the active BMad decisions: Linux-first, Tauri v2, Vanilla TypeScript, Phase 1 desktop-local, no mandatory backend/cloud/sync.
-  - [ ] Add a concise validation baseline section naming the exact desktop environment/session used for MVP tray/AppIndicator validation, for example KDE Plasma X11/Wayland or GNOME with AppIndicator extension.
-  - [ ] Document required Linux system packages at least for Debian/Ubuntu-family environments if that matches the chosen baseline.
-- [ ] Remove or rewrite obsolete repo guidance. (AC: 3, 4)
-  - [ ] Replace the old `src/README.md` guidance that points to `src/tray`, `src/ui`, `src/storage`, and `src/sync`.
-  - [ ] Ensure docs do not claim Phase 1 uses a backend, sync runtime, or mobile framework.
-- [ ] Perform story validation. (AC: 1-4)
-  - [ ] Confirm the scaffolded app has `src-tauri/`, frontend `src/`, `package.json`, and Tauri/Vite config files in the expected root.
-  - [ ] Confirm `pnpm tauri dev` is the documented local dev command.
-  - [ ] Confirm `package.json` and `src-tauri/Cargo.toml` do not include forbidden Phase 1 dependencies listed in AC4.
+- [x] Scaffold the app with the official Tauri Vanilla TypeScript starter. (AC: 1)
+  - [x] Use the project root as the final app root; avoid creating a nested app directory that leaves the repo root as a wrapper.
+  - [x] Select `TypeScript / JavaScript`, `pnpm`, `Vanilla`, and `TypeScript`.
+  - [x] Preserve existing BMad artifacts, docs, and repo history while replacing only obsolete placeholder scaffold files as needed.
+- [x] Install and verify baseline dependencies. (AC: 2, 4)
+  - [x] Run dependency installation with `pnpm`.
+  - [x] Verify the Tauri dev command starts or reaches the next actionable missing-system-dependency error.
+  - [x] Do not add React, Vue, Svelte, Tailwind, SQLite, SQLx, sync, backend, mobile, cloud, account, or Node ORM dependencies in this story.
+- [x] Document the local development command and Linux validation baseline. (AC: 2, 3)
+  - [x] Update the root README so it reflects the active BMad decisions: Linux-first, Tauri v2, Vanilla TypeScript, Phase 1 desktop-local, no mandatory backend/cloud/sync.
+  - [x] Add a concise validation baseline section naming the exact desktop environment/session used for MVP tray/AppIndicator validation, for example KDE Plasma X11/Wayland or GNOME with AppIndicator extension.
+  - [x] Document required Linux system packages at least for Debian/Ubuntu-family environments if that matches the chosen baseline.
+- [x] Remove or rewrite obsolete repo guidance. (AC: 3, 4)
+  - [x] Replace the old `src/README.md` guidance that points to `src/tray`, `src/ui`, `src/storage`, and `src/sync`.
+  - [x] Ensure docs do not claim Phase 1 uses a backend, sync runtime, or mobile framework.
+- [x] Perform story validation. (AC: 1-4)
+  - [x] Confirm the scaffolded app has `src-tauri/`, frontend `src/`, `package.json`, and Tauri/Vite config files in the expected root.
+  - [x] Confirm `pnpm tauri dev` is the documented local dev command.
+  - [x] Confirm `package.json` and `src-tauri/Cargo.toml` do not include forbidden Phase 1 dependencies listed in AC4.
+
+### Review Findings
+
+- [x] [Review][Patch] Restore repo ignore protections removed by the scaffold generator [.gitignore:1]
 
 ## Dev Notes
 
@@ -133,14 +137,70 @@ Do not write "Linux" as the baseline by itself; that is too vague for NFR17.
 
 ### Agent Model Used
 
-TBD by dev agent.
+GPT-5
 
 ### Debug Log References
+
+- `pnpm create tauri-app . --manager pnpm --template vanilla-ts --identifier com.taskbartodolist.desktop --tauri-version 2 --force`
+- `pnpm install`
+- `pnpm build`
+- `pnpm tauri dev`
 
 ### Completion Notes List
 
 - Ultimate context engine analysis completed - comprehensive developer guide created.
+- Scaffolded the official Tauri v2 Vanilla TypeScript starter at the repository root.
+- Restored tracked BMad/docs artifacts after the scaffold generator removed them during forced root generation.
+- Installed pnpm dependencies successfully after approving the required `esbuild` build script.
+- Verified frontend build with `pnpm build`.
+- Verified `pnpm tauri dev` starts Vite on `http://localhost:1420/` and reaches Cargo; local validation currently stops because `rustc 1.85.0` is below the resolved dependency requirement up to `rustc 1.88.0`.
+- Documented Linux validation baseline: Debian GNU/Linux 13 (trixie), GNOME X11, GNOME AppIndicator/KStatusNotifierItem extension for tray validation.
 
 ### File List
 
 - `_bmad-output/implementation-artifacts/1-1-scaffold-tauri-app-and-linux-validation-baseline.md`
+- `_bmad-output/implementation-artifacts/sprint-status.yaml`
+- `.gitignore`
+- `.vscode/extensions.json`
+- `README.md`
+- `index.html`
+- `package.json`
+- `pnpm-lock.yaml`
+- `pnpm-workspace.yaml`
+- `src/README.md`
+- `src/assets/tauri.svg`
+- `src/assets/typescript.svg`
+- `src/assets/vite.svg`
+- `src/main.ts`
+- `src/styles.css`
+- `src-tauri/.gitignore`
+- `src-tauri/Cargo.lock`
+- `src-tauri/Cargo.toml`
+- `src-tauri/build.rs`
+- `src-tauri/capabilities/default.json`
+- `src-tauri/icons/128x128.png`
+- `src-tauri/icons/128x128@2x.png`
+- `src-tauri/icons/32x32.png`
+- `src-tauri/icons/Square107x107Logo.png`
+- `src-tauri/icons/Square142x142Logo.png`
+- `src-tauri/icons/Square150x150Logo.png`
+- `src-tauri/icons/Square284x284Logo.png`
+- `src-tauri/icons/Square30x30Logo.png`
+- `src-tauri/icons/Square310x310Logo.png`
+- `src-tauri/icons/Square44x44Logo.png`
+- `src-tauri/icons/Square71x71Logo.png`
+- `src-tauri/icons/Square89x89Logo.png`
+- `src-tauri/icons/StoreLogo.png`
+- `src-tauri/icons/icon.icns`
+- `src-tauri/icons/icon.ico`
+- `src-tauri/icons/icon.png`
+- `src-tauri/src/lib.rs`
+- `src-tauri/src/main.rs`
+- `src-tauri/tauri.conf.json`
+- `tsconfig.json`
+- `vite.config.ts`
+
+### Change Log
+
+- 2026-05-19: Implemented Story 1.1 scaffold, dependency installation, Linux validation baseline documentation, and validation notes.
+- 2026-05-19: Addressed code review finding: restored repo-level ignore protections for env files and build outputs.
