@@ -14,21 +14,16 @@ stepsCompleted:
   - step-10-nonfunctional
   - step-11-polish
   - step-12-complete
+date: "2026-05-17"
 releaseMode: "phased"
 inputDocuments:
-  - /home/Johan/Documents/taskbar-todolist-desktop/_bmad-output/planning-artifacts/product-brief-taskbar-todolist.md
-  - /home/Johan/Documents/taskbar-todolist-desktop/docs/product.md
-  - /home/Johan/Documents/taskbar-todolist-mobile/README.md
-  - /home/Johan/Documents/taskbar-todolist-mobile/docs/product.md
-  - /home/Johan/Documents/taskbar-todolist-org/README.md
-  - /home/Johan/Documents/taskbar-todolist-org/docs/architecture.md
-  - /home/Johan/Documents/taskbar-todolist-org/docs/product-roadmap.md
-  - /home/Johan/Documents/taskbar-todolist-org/docs/sync-model.md
+  - _bmad-output/planning-artifacts/product-brief-taskbar-todolist.md
+  - docs/product.md
 documentCounts:
   productBriefs: 1
   research: 0
   brainstorming: 0
-  projectDocs: 7
+  projectDocs: 1
 workflowType: "prd"
 classification:
   projectType: "desktop_app"
@@ -440,7 +435,7 @@ L'app mobile existe comme compagnon synchronise, mais le projet est d'abord pilo
 
 ### Performance
 
-- NFR1: Le panneau tray doit s'ouvrir en moins de 1 seconde dans les conditions normales d'utilisation.
+- NFR1: Le panneau tray doit s'ouvrir en moins de 1 seconde, mesure du clic sur l'icone tray jusqu'au panneau visible, avec 500 taches stockees localement sur l'environnement Linux cible du MVP.
 - NFR2: L'ajout d'une tache depuis le tray doit etre realisable en moins de 5 secondes cote utilisateur.
 - NFR3: La suppression d'une tache depuis le tray doit etre possible par ouverture du panneau puis clic sur l'icone poubelle de la tache.
 - NFR4: Le chargement de la liste locale doit se terminer en moins de 500 ms pour 500 taches stockees localement, mesure sur une machine Linux de developpement standard.
@@ -449,7 +444,7 @@ L'app mobile existe comme compagnon synchronise, mais le projet est d'abord pilo
 ### Reliability and Data Safety
 
 - NFR6: Apres creation, modification ou suppression d'une tache, le changement doit etre present apres fermeture et reouverture de l'application dans 100% des tests manuels du scenario MVP.
-- NFR7: Une erreur de synchronisation ne doit jamais supprimer ou corrompre les donnees locales.
+- NFR7: Une erreur de synchronisation simulee par appareil deconnecte, payload invalide ou interruption de transfert ne doit supprimer ni corrompre aucune donnee locale, verifie par comparaison de l'etat des taches avant et apres le test.
 - NFR8: Les suppressions doivent etre representees de maniere a pouvoir etre synchronisees correctement plus tard.
 - NFR9: Le systeme doit permettre de relancer une operation de sync echouee.
 - NFR10: Apres redemarrage du systeme, l'application doit charger les taches locales existantes sans erreur dans 100% des tests de redemarrage MVP.
@@ -463,9 +458,9 @@ L'app mobile existe comme compagnon synchronise, mais le projet est d'abord pilo
 
 ### Linux Compatibility
 
-- NFR15: L'app desktop doit fonctionner sur Linux avec Tauri.
+- NFR15: L'app desktop doit fonctionner sur l'environnement Linux cible du MVP avec Tauri, valide par lancement de l'app, presence de l'icone tray, ouverture du panneau, ajout, suppression, modification et persistance locale.
 - NFR16: Avant d'implementer mobile ou sync, un prototype Tauri doit demontrer sur Linux l'affichage de l'icone tray, l'ouverture du petit panneau, l'input en haut, l'ajout par `Entree`, la poubelle par tache, et la fermeture du panneau sans quitter le processus.
-- NFR17: Le MVP doit prioriser un environnement Linux desktop compatible system tray.
+- NFR17: Le MVP doit prioriser au moins un environnement Linux desktop compatible system tray ou AppIndicator, documente comme environnement de validation principal avant tout support multi-environnement.
 - NFR18: Le support Windows/macOS est hors exigence MVP.
 
 ### Usability

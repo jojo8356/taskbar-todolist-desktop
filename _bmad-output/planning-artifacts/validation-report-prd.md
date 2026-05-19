@@ -1,15 +1,9 @@
 ---
-validationTarget: "/home/Johan/Documents/taskbar-todolist-desktop/_bmad-output/planning-artifacts/prd.md"
-validationDate: "2026-05-17T15:31:26+02:00"
+validationTarget: "_bmad-output/planning-artifacts/prd.md"
+validationDate: "2026-05-19"
 inputDocuments:
-  - /home/Johan/Documents/taskbar-todolist-desktop/_bmad-output/planning-artifacts/product-brief-taskbar-todolist.md
-  - /home/Johan/Documents/taskbar-todolist-desktop/docs/product.md
-  - /home/Johan/Documents/taskbar-todolist-mobile/README.md
-  - /home/Johan/Documents/taskbar-todolist-mobile/docs/product.md
-  - /home/Johan/Documents/taskbar-todolist-org/README.md
-  - /home/Johan/Documents/taskbar-todolist-org/docs/architecture.md
-  - /home/Johan/Documents/taskbar-todolist-org/docs/product-roadmap.md
-  - /home/Johan/Documents/taskbar-todolist-org/docs/sync-model.md
+  - "_bmad-output/planning-artifacts/product-brief-taskbar-todolist.md"
+  - "docs/product.md"
 validationStepsCompleted:
   - step-v-01-discovery
   - step-v-02-format-detection
@@ -25,25 +19,23 @@ validationStepsCompleted:
   - step-v-12-completeness-validation
 validationStatus: COMPLETE
 holisticQualityRating: "4/5 - Good"
-overallStatus: "Warning - Issues Addressed by Edit"
+overallStatus: "Pass after simple fixes"
 ---
 
 # PRD Validation Report
 
-**PRD Being Validated:** `/home/Johan/Documents/taskbar-todolist-desktop/_bmad-output/planning-artifacts/prd.md`
-**Validation Date:** 2026-05-17T15:24:20+02:00
+**PRD Being Validated:** `_bmad-output/planning-artifacts/prd.md`
+**Validation Date:** 2026-05-19
 
 ## Input Documents
 
-- PRD: `/home/Johan/Documents/taskbar-todolist-desktop/_bmad-output/planning-artifacts/prd.md`
-- Product Brief: `/home/Johan/Documents/taskbar-todolist-desktop/_bmad-output/planning-artifacts/product-brief-taskbar-todolist.md`
-- Desktop Product Doc: `/home/Johan/Documents/taskbar-todolist-desktop/docs/product.md`
-- Mobile README: `/home/Johan/Documents/taskbar-todolist-mobile/README.md`
-- Mobile Product Doc: `/home/Johan/Documents/taskbar-todolist-mobile/docs/product.md`
-- Organization README: `/home/Johan/Documents/taskbar-todolist-org/README.md`
-- Architecture Context: `/home/Johan/Documents/taskbar-todolist-org/docs/architecture.md`
-- Roadmap Context: `/home/Johan/Documents/taskbar-todolist-org/docs/product-roadmap.md`
-- Sync Model Context: `/home/Johan/Documents/taskbar-todolist-org/docs/sync-model.md`
+- PRD: `_bmad-output/planning-artifacts/prd.md`
+- Product Brief: `_bmad-output/planning-artifacts/product-brief-taskbar-todolist.md`
+- Desktop Product Doc: `docs/product.md`
+
+## Frontmatter Cleanup Status
+
+The PRD frontmatter now uses workspace-relative paths for the available local source documents.
 
 ## Validation Findings
 
@@ -55,6 +47,7 @@ overallStatus: "Warning - Issues Addressed by Edit"
 
 - Executive Summary
 - Project Classification
+- Product Definitions
 - Success Criteria
 - Product Scope
 - User Journeys
@@ -99,27 +92,27 @@ overallStatus: "Warning - Issues Addressed by Edit"
 
 **Vision Statement:** Fully Covered
 
-The PRD covers the Linux-first, taskbar-first, personal, local-first todolist vision in Executive Summary, Project Classification, Product Scope, and Scoping.
+The PRD covers the personal Linux-first todolist vision, taskbar/system-tray access, local-first operation, and mobile companion direction in the Executive Summary, Product Scope, and Vision/Future sections.
 
 **Target Users:** Fully Covered
 
-The PRD identifies Johan as the primary personal Linux user through User Journeys and Success Criteria.
+The PRD identifies Johan as the primary Linux desktop user through User Success criteria and all five User Journeys.
 
 **Problem Statement:** Fully Covered
 
-The PRD captures the core friction: classic todolists are too heavy for quick daily tasks, and the product should reduce interruption.
+The PRD captures the same core problem from the brief: classic todolists add friction for small daily tasks, while this product optimizes immediate capture and cleanup.
 
 **Key Features:** Fully Covered
 
-Desktop tray add/delete, full edit UI, local storage, mobile companion, local/USB sync, simple status, and no mandatory cloud are covered across Product Scope, FRs, NFRs, and project-type requirements.
+Desktop tray access, quick add, row-level delete, full edit UI, task status, local storage, offline operation, mobile companion, local/USB sync, duplicate prevention, and sync error feedback are all represented in scope, journeys, FRs, and NFRs.
 
 **Goals/Objectives:** Fully Covered
 
-The PRD includes measurable outcomes for add speed, delete flow, offline usage, sync behavior, and data safety.
+The PRD converts brief success signals into measurable outcomes: add under 5 seconds, delete without full UI, offline operation, sync propagation, no local data loss, and minimal data fields.
 
 **Differentiators:** Fully Covered
 
-The PRD covers taskbar-first positioning, strict simplicity, Linux-first focus, and local-first/no-cloud sync approach.
+The PRD preserves the differentiators: tray-first desktop surface, intentionally narrow personal scope, Linux-first focus, local-first/no mandatory cloud, and avoidance of project-management complexity.
 
 ### Coverage Summary
 
@@ -134,51 +127,42 @@ The PRD covers taskbar-first positioning, strict simplicity, Linux-first focus, 
 
 ### Functional Requirements
 
-**Total FRs Analyzed:** 44
+**Total FRs Analyzed:** 45
 
 **Format Violations:** 0
 
-**Subjective Adjectives Found:** 1
+**Subjective Adjectives Found:** 0
 
-- Line 355, FR1: "tache simple" is acceptable product terminology, but can be made more testable by defining allowed fields.
+The word "simple" appears in FR1, but `tache simple` is explicitly defined in Product Definitions and is treated as product terminology rather than subjective wording.
 
 **Vague Quantifiers Found:** 0
 
 **Implementation Leakage:** 0
 
-**FR Violations Total:** 1
+**FR Violations Total:** 0
 
 ### Non-Functional Requirements
 
 **Total NFRs Analyzed:** 25
 
-**Missing Metrics:** 8
+**Missing Metrics:** 0
 
-- Line 425, NFR4: "instantane" is not measurable.
-- Line 426, NFR5: "legere" and "ressources visibles" are not measurable.
-- Line 430, NFR6: measurable outcome exists, but no test condition is defined.
-- Line 434, NFR10: "lisible" needs a validation method.
-- Line 446, NFR16: "tot" is not measurable.
-- Line 452, NFR19: "visibles ou directement accessibles" needs an interaction threshold.
-- Line 455, NFR22: "comprehensibles" needs a user-action or wording criterion.
-- Line 459, NFR23: "maintenable par une seule personne" needs a concrete boundary.
+**Incomplete Template:** 0
 
-**Incomplete Template:** 10
-
-- Several NFRs define the quality target but omit measurement method or test context. Primary examples: NFR4, NFR5, NFR6, NFR10, NFR16, NFR19, NFR22, NFR23, NFR24, NFR25.
+NFR1, NFR7, NFR15, and NFR17 were updated after validation to include clearer test context, validation method, or compatibility target.
 
 **Missing Context:** 0
 
-**NFR Violations Total:** 18
+**NFR Violations Total:** 0
 
 ### Overall Assessment
 
-**Total Requirements:** 69
-**Total Violations:** 19
+**Total Requirements:** 70
+**Total Violations:** 0
 
-**Severity:** Critical
+**Severity:** Pass
 
-**Recommendation:** Functional requirements are strong, but several NFRs need refinement to be measurable. Before architecture or implementation, revise NFR4, NFR5, NFR10, NFR16, NFR19, NFR22, NFR23, NFR24, and NFR25 with explicit thresholds or validation methods.
+**Recommendation:** Requirements are measurable enough for downstream architecture planning.
 
 ## Traceability Validation
 
@@ -186,25 +170,25 @@ The PRD covers taskbar-first positioning, strict simplicity, Linux-first focus, 
 
 **Executive Summary -> Success Criteria:** Intact
 
-The summary defines taskbar-first capture, local-first operation, Tauri/Linux, mobile companion, and local/USB sync. Success criteria cover speed, offline use, sync, and data safety.
+The Executive Summary defines taskbar-first desktop capture, quick add/delete, local-first operation, Tauri/Linux, mobile companion sync, and no mandatory cloud. Success Criteria cover those same dimensions through user success, business success, technical success, and measurable outcomes.
 
 **Success Criteria -> User Journeys:** Intact
 
-The success criteria are supported by journeys for capture, deletion, full editing, mobile retrieval, and sync error recovery.
+Success criteria are supported by journeys for rapid Linux capture, quick cleanup, full edit UI, mobile retrieval after sync, and sync failure recovery.
 
 **User Journeys -> Functional Requirements:** Intact
 
 Each journey maps to one or more FR groups:
 
-- Capture rapide depuis Linux -> FR9-FR15, FR21-FR23
-- Nettoyage rapide d'une tache -> FR2-FR3, FR12-FR13, FR25, FR36
-- Modification dans l'UI complete -> FR16-FR20
-- Retrouver ses taches sur mobile -> FR26-FR40
-- Recuperation apres erreur de sync -> FR24, FR38-FR40
+- Journey 1, rapid capture: FR9-FR13, FR16, FR22-FR24.
+- Journey 2, quick cleanup: FR2-FR3, FR6, FR13-FR14, FR22, FR26, FR37.
+- Journey 3, full edit UI: FR15, FR17-FR21, FR24.
+- Journey 4, mobile retrieval: FR27-FR41, FR43.
+- Journey 5, sync error recovery: FR25, FR39-FR41.
 
 **Scope -> FR Alignment:** Intact
 
-Phase 1 desktop local maps to FR1-FR25 and FR41-FR44. Phase 2 mobile/sync maps to FR26-FR40.
+Phase 1 desktop local scope maps to FR1-FR26 and FR42-FR45. Phase 2 mobile/local sync scope maps to FR27-FR41 and FR43.
 
 ### Orphan Elements
 
@@ -218,19 +202,19 @@ Phase 1 desktop local maps to FR1-FR25 and FR41-FR44. Phase 2 mobile/sync maps t
 
 | Requirement Range | Source |
 | --- | --- |
-| FR1-FR8 | Task management scope, journeys 1-3 |
-| FR9-FR15 | Tray-first differentiator, journeys 1-2 |
-| FR16-FR20 | Full editing UI, journey 3 |
-| FR21-FR25 | Local-first requirement, data safety success criteria |
-| FR26-FR31 | Mobile companion, journey 4 |
-| FR32-FR40 | Local/USB sync and error recovery, journeys 4-5 |
-| FR41-FR44 | Settings/control needs from tray and sync flows |
+| FR1-FR8 | Task management scope, product definition, journeys 1-3 |
+| FR9-FR16 | Tray-first differentiator, journeys 1-2, Linux desktop scope |
+| FR17-FR21 | Full editing UI, journey 3 |
+| FR22-FR26 | Local storage, offline operation, data safety and future sync propagation |
+| FR27-FR32 | Mobile companion, journey 4, Phase 2 scope |
+| FR33-FR41 | Local/USB sync, duplicate prevention, propagation, success/failure feedback, journeys 4-5 |
+| FR42-FR45 | Minimal settings/control, sync mode visibility, quit behavior, tray state awareness |
 
 **Total Traceability Issues:** 0
 
 **Severity:** Pass
 
-**Recommendation:** Traceability chain is intact. All functional requirements trace to user needs or business objectives.
+**Recommendation:** Traceability chain is intact. All requirements trace to user needs or business objectives.
 
 ## Implementation Leakage Validation
 
@@ -250,7 +234,7 @@ Phase 1 desktop local maps to FR1-FR25 and FR41-FR44. Phase 2 mobile/sync maps t
 
 **Other Implementation Details:** 0 violations
 
-Tauri appears in NFR15 and surrounding context, but this is treated as an explicit platform/product constraint rather than leakage. It was directly selected by the user as the desktop technology.
+Tauri appears in the PRD and in NFR15/NFR16, but it is treated as an explicit product/platform constraint already selected for the desktop app, not inappropriate implementation leakage. SQLite appears only in architecture considerations as a recommendation, not in the FR/NFR capability contract.
 
 ### Summary
 
@@ -258,7 +242,7 @@ Tauri appears in NFR15 and surrounding context, but this is treated as an explic
 
 **Severity:** Pass
 
-**Recommendation:** No significant implementation leakage found. Requirements properly specify capabilities and quality constraints without inappropriate implementation detail.
+**Recommendation:** No significant implementation leakage found. Requirements properly specify WHAT without inappropriate HOW detail.
 
 ## Domain Compliance Validation
 
@@ -280,7 +264,7 @@ Covered in Desktop App Specific Requirements -> Platform Support.
 
 **System Integration:** Present
 
-Covered in Desktop App Specific Requirements -> System Integration and taskbar/tray FRs.
+Covered in Desktop App Specific Requirements -> System Integration, with tray icon, panel behavior, input placement, delete action, full UI access, and background availability.
 
 **Update Strategy:** Present
 
@@ -288,15 +272,15 @@ Covered in Desktop App Specific Requirements -> Update Strategy.
 
 **Offline Capabilities:** Present
 
-Covered in Desktop App Specific Requirements -> Offline Capabilities, Local Storage FRs, and NFRs.
+Covered in Desktop App Specific Requirements -> Offline Capabilities, Local Storage FRs, and Security/Privacy NFRs.
 
 ### Excluded Sections (Should Not Be Present)
 
 **web_seo:** Absent
 
-**mobile_features:** Present as intentional scoped companion surface
+**mobile_features:** Present as intentional Phase 2 companion scope
 
-The PRD includes mobile requirements because the user explicitly defined a mobile companion app and sync as Phase 2. This is an intentional product scope exception, not accidental desktop PRD pollution.
+The CSV excludes mobile-specific sections for a pure desktop app. This PRD intentionally includes mobile and sync as Phase 2 companion functionality while keeping Phase 1 desktop-local. This is acceptable if downstream architecture treats Phase 1 and Phase 2 separately.
 
 ### Compliance Summary
 
@@ -306,16 +290,16 @@ The PRD includes mobile requirements because the user explicitly defined a mobil
 
 **Severity:** Pass
 
-**Recommendation:** All required sections for desktop_app are present. Mobile content is intentionally scoped as Phase 2 companion functionality.
+**Recommendation:** All required sections for desktop_app are present. Mobile content is intentionally scoped as Phase 2 companion functionality and should remain separated from Phase 1 architecture and stories.
 
 ## SMART Requirements Validation
 
-**Total Functional Requirements:** 44
+**Total Functional Requirements:** 45
 
 ### Scoring Summary
 
-**All scores >= 3:** 100% (44/44)
-**All scores >= 4:** 100% (44/44)
+**All scores >= 3:** 100% (45/45)
+**All scores >= 4:** 100% (45/45)
 **Overall Average Score:** 4.8/5.0
 
 ### Scoring Table
@@ -336,8 +320,8 @@ The PRD includes mobile requirements because the user explicitly defined a mobil
 | FR12 | 5 | 5 | 5 | 5 | 5 | 5.0 |  |
 | FR13 | 5 | 5 | 5 | 5 | 5 | 5.0 |  |
 | FR14 | 5 | 5 | 5 | 5 | 5 | 5.0 |  |
-| FR15 | 4 | 4 | 5 | 5 | 5 | 4.6 |  |
-| FR16 | 5 | 5 | 5 | 5 | 5 | 5.0 |  |
+| FR15 | 5 | 5 | 5 | 5 | 5 | 5.0 |  |
+| FR16 | 4 | 4 | 5 | 5 | 5 | 4.6 |  |
 | FR17 | 5 | 5 | 5 | 5 | 5 | 5.0 |  |
 | FR18 | 5 | 5 | 5 | 5 | 5 | 5.0 |  |
 | FR19 | 5 | 5 | 5 | 5 | 5 | 5.0 |  |
@@ -346,8 +330,8 @@ The PRD includes mobile requirements because the user explicitly defined a mobil
 | FR22 | 5 | 5 | 5 | 5 | 5 | 5.0 |  |
 | FR23 | 5 | 5 | 5 | 5 | 5 | 5.0 |  |
 | FR24 | 5 | 5 | 5 | 5 | 5 | 5.0 |  |
-| FR25 | 4 | 4 | 5 | 5 | 5 | 4.6 |  |
-| FR26 | 5 | 5 | 5 | 5 | 5 | 5.0 |  |
+| FR25 | 5 | 5 | 5 | 5 | 5 | 5.0 |  |
+| FR26 | 4 | 4 | 5 | 5 | 5 | 4.6 |  |
 | FR27 | 5 | 5 | 5 | 5 | 5 | 5.0 |  |
 | FR28 | 5 | 5 | 5 | 5 | 5 | 5.0 |  |
 | FR29 | 5 | 5 | 5 | 5 | 5 | 5.0 |  |
@@ -362,10 +346,11 @@ The PRD includes mobile requirements because the user explicitly defined a mobil
 | FR38 | 5 | 5 | 5 | 5 | 5 | 5.0 |  |
 | FR39 | 5 | 5 | 5 | 5 | 5 | 5.0 |  |
 | FR40 | 5 | 5 | 5 | 5 | 5 | 5.0 |  |
-| FR41 | 4 | 4 | 5 | 5 | 5 | 4.6 |  |
-| FR42 | 5 | 5 | 5 | 5 | 5 | 5.0 |  |
-| FR43 | 5 | 5 | 5 | 5 | 5 | 5.0 |  |
-| FR44 | 4 | 4 | 5 | 5 | 5 | 4.6 |  |
+| FR41 | 5 | 5 | 5 | 5 | 5 | 5.0 |  |
+| FR42 | 4 | 4 | 5 | 5 | 5 | 4.6 |  |
+| FR43 | 4 | 4 | 5 | 5 | 5 | 4.6 |  |
+| FR44 | 5 | 5 | 5 | 5 | 5 | 5.0 |  |
+| FR45 | 4 | 4 | 5 | 5 | 5 | 4.6 |  |
 
 **Legend:** 1=Poor, 3=Acceptable, 5=Excellent
 **Flag:** X = Score < 3 in one or more categories
@@ -374,7 +359,7 @@ The PRD includes mobile requirements because the user explicitly defined a mobil
 
 **Low-Scoring FRs:** None
 
-Minor optional refinement: define "tache simple" once in the PRD glossary or functional section as text + status + metadata, so FR1 remains unambiguous.
+Minor optional refinement: FR42 and FR45 could name the minimum configuration/state items required for Phase 1, but both remain acceptable for PRD-level planning.
 
 ### Overall Assessment
 
@@ -390,16 +375,16 @@ Minor optional refinement: define "tache simple" once in the PRD glossary or fun
 
 **Strengths:**
 
-- Clear progression from vision to scope, journeys, requirements, and NFRs.
-- Strong separation between Phase 1 desktop local and Phase 2 mobile/sync.
-- Product differentiator remains consistent: taskbar-first, simple, personal, local-first.
-- Functional requirements are complete enough to drive UX, architecture, epics, and stories.
+- Clear progression from product vision to scope, journeys, requirements, and quality constraints.
+- Strong Phase 1 / Phase 2 separation: desktop local first, mobile/sync later.
+- Consistent product identity: taskbar-first, personal, minimal, local-first.
+- User journeys are concrete enough to feed UX, architecture, epics, and stories.
+- Functional requirements are complete and strongly traceable.
 
 **Areas for Improvement:**
 
-- NFRs need tighter metrics and validation methods.
-- Some historical source documents mention backend/cloud sync, while the PRD correctly pivots to local/USB sync; this should remain explicit to avoid architecture drift.
-- "Tache simple" should be defined once as an explicit data shape or glossary term.
+- Mobile companion content is intentionally included, but downstream planning must keep it separate from Phase 1 desktop implementation.
+- Architecture should name the exact Linux desktop environment used as the MVP validation baseline.
 
 ### Dual Audience Effectiveness
 
@@ -413,7 +398,7 @@ Minor optional refinement: define "tache simple" once in the PRD glossary or fun
 **For LLMs:**
 
 - Machine-readable structure: Excellent
-- UX readiness: Good
+- UX readiness: Excellent
 - Architecture readiness: Good
 - Epic/Story readiness: Good
 
@@ -423,15 +408,15 @@ Minor optional refinement: define "tache simple" once in the PRD glossary or fun
 
 | Principle | Status | Notes |
 | --- | --- | --- |
-| Information Density | Met | No filler anti-patterns detected. |
-| Measurability | Partial | FRs are strong; NFRs need measurable refinement. |
-| Traceability | Met | All FRs map to journeys, scope, or success criteria. |
-| Domain Awareness | Met | Low-complexity general domain correctly skips compliance. |
-| Zero Anti-Patterns | Met | No major filler or format anti-patterns. |
-| Dual Audience | Met | Structure supports humans and downstream LLM workflows. |
-| Markdown Format | Met | Main sections use Level 2 headers and consistent structure. |
+| Information Density | Met | No filler or wordy anti-patterns detected. |
+| Measurability | Met | FRs are strong and the previously flagged NFRs now include clearer validation context. |
+| Traceability | Met | Requirements trace cleanly to scope, journeys, and outcomes. |
+| Domain Awareness | Met | General low-complexity domain correctly avoids unnecessary compliance sections. |
+| Zero Anti-Patterns | Met | No significant structural or language anti-patterns found. |
+| Dual Audience | Met | Useful for humans and downstream LLM workflows. |
+| Markdown Format | Met | Standard BMAD structure with clear Level 2 sections. |
 
-**Principles Met:** 6/7
+**Principles Met:** 7/7
 
 ### Overall Quality Rating
 
@@ -447,20 +432,20 @@ Minor optional refinement: define "tache simple" once in the PRD glossary or fun
 
 ### Top 3 Improvements
 
-1. **Make NFRs fully measurable**
-   Add thresholds, test conditions, or validation methods to the NFRs flagged in the measurability section.
+1. **Name the Linux validation baseline in architecture**
+   Choose the concrete desktop environment and tray/AppIndicator setup that Phase 1 must prove first.
 
-2. **Define "tache simple" explicitly**
-   Add a short definition such as: text, status, createdAt, updatedAt, deletedAt, stable id. This removes ambiguity for UX and architecture.
+2. **Preserve Phase 1 / Phase 2 separation**
+   Keep architecture, epics, and stories focused on desktop local Phase 1 first; treat mobile/sync as explicit Phase 2 work to avoid scope drift.
 
-3. **Make local/USB sync decision explicit against older backend references**
-   Add a short note that backend/cloud sync references in historical org docs are superseded for MVP/Phase 2 by local/USB sync.
+3. **Carry the tray prototype risk forward**
+   Architecture should explicitly front-load the Tauri Linux tray proof before database, mobile, or sync work.
 
 ### Summary
 
-**This PRD is:** strong and ready for downstream planning once NFR measurability is improved.
+**This PRD is:** strong enough for architecture and downstream planning.
 
-**To make it great:** refine the NFRs, define the task data shape, and preserve the local/USB sync decision during architecture.
+**To make it great:** carry the Linux tray validation baseline and Phase 1 scope discipline into architecture.
 
 ## Completeness Validation
 
@@ -482,70 +467,52 @@ No template variables remaining.
 
 **Functional Requirements:** Complete
 
-**Non-Functional Requirements:** Complete with specificity caveat
-
-NFR section is present and covers relevant categories, but several NFRs need stronger metrics or validation methods as noted in Measurability Validation.
+**Non-Functional Requirements:** Complete
 
 ### Section-Specific Completeness
 
 **Success Criteria Measurability:** All measurable
 
-**User Journeys Coverage:** Yes - covers desktop capture, deletion, edit UI, mobile retrieval, and sync failure recovery.
+**User Journeys Coverage:** Yes - covers the primary personal Linux user and the relevant Phase 1/Phase 2 flows.
 
 **FRs Cover MVP Scope:** Yes
 
-**NFRs Have Specific Criteria:** Some
+**NFRs Have Specific Criteria:** All
 
-NFRs exist for all relevant categories, but specificity is incomplete for several criteria.
+Previously flagged NFRs now include clearer validation context.
 
 ### Frontmatter Completeness
 
 **stepsCompleted:** Present
 **classification:** Present
 **inputDocuments:** Present
-**date:** Present in document body
+**date:** Present
 
-**Frontmatter Completeness:** 3/4 strict frontmatter fields; date is present in document body, not frontmatter.
+**Frontmatter Completeness:** 4/4
 
 ### Completeness Summary
 
-**Overall Completeness:** 92% (all required sections present; NFR specificity remains partial)
+**Overall Completeness:** 100% (all required PRD sections and frontmatter fields present)
 
 **Critical Gaps:** 0
-**Minor Gaps:** 2
+**Minor Gaps:** 0
 
-- Several NFRs need measurable thresholds or test methods.
-- Date is in document body rather than frontmatter.
+**Severity:** Pass
 
-**Severity:** Warning
+**Recommendation:** PRD is complete enough to proceed to architecture planning.
 
-**Recommendation:** PRD is complete enough for review and next planning workflows, but NFR specificity should be improved before implementation readiness.
+## Immediate Fixes Applied
 
-## Edit Workflow Follow-Up
+**Fix Date:** 2026-05-19
 
-**Edit Date:** 2026-05-17T15:35:13+02:00
+Simple validation findings were addressed directly in the PRD:
 
-The validation findings were addressed directly in the PRD:
+- Replaced stale absolute `inputDocuments` paths with workspace-relative paths.
+- Added `date` to PRD frontmatter.
+- Updated `documentCounts.projectDocs` to reflect the local documents actually available in this workspace.
+- Rewrote NFR1 with explicit measurement start/end, dataset size, and target MVP Linux environment.
+- Rewrote NFR7 with explicit sync failure scenarios and before/after data-state validation.
+- Rewrote NFR15 with concrete MVP validation actions.
+- Rewrote NFR17 to require a documented tray/AppIndicator-compatible Linux validation environment.
 
-- Added `Product Definitions` with an explicit definition of `tache simple`.
-- Added `Synchronisation retenue` to clarify that older backend/cloud references are superseded by local/USB sync for this PRD.
-- Rewrote NFR4, NFR5, NFR6, NFR10, NFR16, NFR19, NFR22, NFR23, NFR24, and NFR25 with measurable thresholds, test scenarios, or explicit validation conditions.
-
-**Post-Edit Assessment:** The critical NFR measurability issue has been addressed. A fresh validation pass should now move the PRD closer to Pass.
-
-## UX Scope Clarification Follow-Up
-
-**Clarification:** Phase 1 tray UX was refined after stakeholder correction.
-
-The intended desktop interaction is now explicit:
-
-- user clicks the taskbar/tray icon;
-- a small panel opens;
-- the task list is visible in the panel;
-- an input remains fixed at the top to support faster successive additions;
-- pressing `Entree` adds the typed task;
-- each task row has a trash icon on the right for deletion.
-
-This clarification was applied to the PRD and UX design specification.
-
-**Later refinement:** The input position was changed from bottom to top because top placement is more practical and user-friendly for adding tasks quickly, especially when entering several tasks in sequence.
+**Post-Fix Assessment:** The simple completeness and NFR specificity warnings have been resolved. The PRD can proceed to architecture.

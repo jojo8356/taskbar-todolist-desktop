@@ -10,16 +10,16 @@ stepsCompleted:
   - 8
   - 9
 inputDocuments:
-  - /home/Johan/Documents/taskbar-todolist-desktop/_bmad-output/planning-artifacts/prd.md
-  - /home/Johan/Documents/taskbar-todolist-desktop/_bmad-output/planning-artifacts/product-brief-taskbar-todolist.md
-  - /home/Johan/Documents/taskbar-todolist-desktop/_bmad-output/planning-artifacts/validation-report-prd.md
-  - /home/Johan/Documents/taskbar-todolist-desktop/docs/product.md
-  - /home/Johan/Documents/taskbar-todolist-mobile/README.md
-  - /home/Johan/Documents/taskbar-todolist-mobile/docs/product.md
-  - /home/Johan/Documents/taskbar-todolist-org/README.md
-  - /home/Johan/Documents/taskbar-todolist-org/docs/architecture.md
-  - /home/Johan/Documents/taskbar-todolist-org/docs/product-roadmap.md
-  - /home/Johan/Documents/taskbar-todolist-org/docs/sync-model.md
+  - _bmad-output/planning-artifacts/prd.md
+  - _bmad-output/planning-artifacts/product-brief-taskbar-todolist.md
+  - _bmad-output/planning-artifacts/validation-report-prd.md
+  - docs/product.md
+  - ../taskbar-todolist-mobile/README.md
+  - ../taskbar-todolist-mobile/docs/product.md
+  - ../taskbar-todolist-org/README.md
+  - ../taskbar-todolist-org/docs/architecture.md
+  - ../taskbar-todolist-org/docs/product-roadmap.md
+  - ../taskbar-todolist-org/docs/sync-model.md
 ---
 
 ## Executive Summary

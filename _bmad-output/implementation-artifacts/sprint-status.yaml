@@ -1,0 +1,77 @@
+# generated: 2026-05-19T14:38:52+02:00
+# last_updated: 2026-05-19T14:50:00+02:00
+# project: taskbar-todolist-desktop
+# project_key: NOKEY
+# tracking_system: file-system
+# story_location: /home/pj509414/Documents/projets perso/taskbar-todolist-desktop/_bmad-output/implementation-artifacts
+#
+# STATUS DEFINITIONS:
+# ==================
+# Epic Status:
+#   - backlog: Epic not yet started
+#   - in-progress: Epic actively being worked on
+#   - done: All stories in epic completed
+#
+# Epic Status Transitions:
+#   - backlog -> in-progress: Automatically when first story is created (via create-story)
+#   - in-progress -> done: Manually when all stories reach 'done' status
+#
+# Story Status:
+#   - backlog: Story only exists in epic file
+#   - ready-for-dev: Story file created in stories folder
+#   - in-progress: Developer actively working on implementation
+#   - review: Ready for code review (via Dev's code-review workflow)
+#   - done: Story completed
+#
+# Retrospective Status:
+#   - optional: Can be completed but not required
+#   - done: Retrospective has been completed
+#
+# WORKFLOW NOTES:
+# ===============
+# - Epic transitions to 'in-progress' automatically when first story is created
+# - Stories can be worked in parallel if team capacity allows
+# - Developer typically creates next story after previous one is 'done' to incorporate learnings
+# - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
+# - This file follows the corrected implementation sequence from epics.md: Epic 1 -> Epic 3 -> Epic 2 -> Epic 4 -> Epic 5.
+
+generated: "2026-05-19T14:38:52+02:00"
+last_updated: "2026-05-19T14:50:00+02:00"
+project: taskbar-todolist-desktop
+project_key: NOKEY
+tracking_system: file-system
+story_location: /home/pj509414/Documents/projets perso/taskbar-todolist-desktop/_bmad-output/implementation-artifacts
+
+development_status:
+  epic-1: in-progress
+  1-1-scaffold-tauri-app-and-linux-validation-baseline: in-progress
+  1-2-tray-icon-opens-compact-panel-without-quitting-app: backlog
+  1-3-app-tray-controls-and-explicit-quit: backlog
+  epic-1-retrospective: optional
+
+  epic-3: backlog
+  3-1-sqlx-sqlite-task-schema-and-migrations: backlog
+  3-2-rust-task-repository-and-tauri-commands: backlog
+  3-3-persist-tray-tasks-across-app-restart: backlog
+  3-4-soft-delete-and-local-data-safety: backlog
+  epic-3-retrospective: optional
+
+  epic-2: backlog
+  2-1-compact-native-tray-panel-ui: backlog
+  2-2-add-task-from-top-input-with-enter: backlog
+  2-3-active-task-list-rendering: backlog
+  2-4-delete-task-from-row-trash-action: backlog
+  epic-2-retrospective: optional
+
+  epic-4: backlog
+  4-1-open-full-edit-ui-from-tray: backlog
+  4-2-select-and-edit-task-text: backlog
+  4-3-change-task-status-in-full-ui: backlog
+  epic-4-retrospective: optional
+
+  epic-5: backlog
+  5-1-mobile-local-task-companion: backlog
+  5-2-sync-mode-selection-and-explicit-trigger: backlog
+  5-3-bidirectional-task-transfer-and-merge: backlog
+  5-4-deletion-propagation-sync-feedback-and-retry: backlog
+  epic-5-retrospective: optional
