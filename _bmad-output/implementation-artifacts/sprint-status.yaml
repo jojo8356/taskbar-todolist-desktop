@@ -1,5 +1,5 @@
 # generated: 2026-05-19T14:38:52+02:00
-# last_updated: 2026-05-22T11:10:00+02:00
+# last_updated: 2026-05-22T11:06:26+02:00
 # project: taskbar-todolist-desktop
 # project_key: NOKEY
 # tracking_system: file-system
@@ -36,7 +36,7 @@
 # - This file follows the corrected implementation sequence from epics.md: Epic 1 -> Epic 3 -> Epic 2 -> Epic 4 -> Epic 5.
 
 generated: "2026-05-19T14:38:52+02:00"
-last_updated: "2026-05-22T11:10:00+02:00"
+last_updated: "2026-05-22T11:06:26+02:00"
 project: taskbar-todolist-desktop
 project_key: NOKEY
 tracking_system: file-system
@@ -63,10 +63,10 @@ development_status:
   2-4-delete-task-from-row-trash-action: done
   epic-2-retrospective: optional
 
-  epic-4: backlog
-  4-1-open-full-edit-ui-from-tray: backlog
-  4-2-select-and-edit-task-text: backlog
-  4-3-change-task-status-in-full-ui: backlog
+  epic-4: done
+  4-1-open-full-edit-ui-from-tray: done
+  4-2-select-and-edit-task-text: done
+  4-3-change-task-status-in-full-ui: done
   epic-4-retrospective: optional
 
   epic-5: backlog

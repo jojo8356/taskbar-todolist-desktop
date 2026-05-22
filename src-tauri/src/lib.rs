@@ -14,6 +14,11 @@ fn hide_tray_panel(app_handle: tauri::AppHandle) -> Result<(), String> {
 }
 
 #[tauri::command]
+fn show_full_edit(app_handle: tauri::AppHandle) -> Result<(), String> {
+    app::windows::show_full_edit(&app_handle).map_err(|error| error.to_string())
+}
+
+#[tauri::command]
 fn quit_app(app_handle: tauri::AppHandle) {
     app_handle.exit(0);
 }
@@ -39,6 +44,7 @@ pub fn run() {
             tasks::commands::delete_task,
             show_tray_panel,
             hide_tray_panel,
+            show_full_edit,
             quit_app
         ])
         .on_window_event(app::windows::handle_window_event)

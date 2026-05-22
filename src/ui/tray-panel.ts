@@ -1,7 +1,7 @@
 import { listen } from "@tauri-apps/api/event";
-import { createElement, ListTodo, Power, X } from "lucide";
+import { createElement, ListTodo, Maximize2, Power, X } from "lucide";
 
-import { hideTrayPanel, quitApp } from "../state/app-commands";
+import { hideTrayPanel, quitApp, showFullEdit } from "../state/app-commands";
 import { createTask, deleteTask, listTasks } from "../state/task-commands";
 import { TaskStore } from "../state/task-store";
 import type { Task } from "../types/task";
@@ -46,7 +46,21 @@ function createPanel(): { element: HTMLElement; loadTasks: () => Promise<void> }
     void hideTrayPanel();
   });
 
-  header.append(titleGroup, hideButton);
+  const headerActions = document.createElement("div");
+  headerActions.className = "tray-panel__header-actions";
+
+  const fullEditButton = document.createElement("button");
+  fullEditButton.className = "icon-button";
+  fullEditButton.type = "button";
+  fullEditButton.title = "Open full editor";
+  fullEditButton.setAttribute("aria-label", "Open full editor");
+  fullEditButton.append(createElement(Maximize2));
+  fullEditButton.addEventListener("click", () => {
+    void showFullEdit();
+  });
+
+  headerActions.append(fullEditButton, hideButton);
+  header.append(titleGroup, headerActions);
 
   const tasksRegion = document.createElement("section");
   tasksRegion.className = "tasks-region";

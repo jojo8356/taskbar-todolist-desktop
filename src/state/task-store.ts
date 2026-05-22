@@ -18,4 +18,8 @@ export class TaskStore {
   remove(id: string): void {
     this.#tasks = this.#tasks.filter((task) => task.id !== id);
   }
+
+  update(task: Task): void {
+    this.#tasks = this.#tasks.map((item) => (item.id === task.id ? task : item));
+  }
 }
