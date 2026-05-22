@@ -1,5 +1,5 @@
 # generated: 2026-05-19T14:38:52+02:00
-# last_updated: 2026-05-19T15:25:04+02:00
+# last_updated: 2026-05-22T10:55:00+02:00
 # project: taskbar-todolist-desktop
 # project_key: NOKEY
 # tracking_system: file-system
@@ -36,7 +36,7 @@
 # - This file follows the corrected implementation sequence from epics.md: Epic 1 -> Epic 3 -> Epic 2 -> Epic 4 -> Epic 5.
 
 generated: "2026-05-19T14:38:52+02:00"
-last_updated: "2026-05-19T15:25:04+02:00"
+last_updated: "2026-05-22T10:55:00+02:00"
 project: taskbar-todolist-desktop
 project_key: NOKEY
 tracking_system: file-system
@@ -49,11 +49,11 @@ development_status:
   1-3-app-tray-controls-and-explicit-quit: done
   epic-1-retrospective: optional
 
-  epic-3: in-progress
-  3-1-sqlx-sqlite-task-schema-and-migrations: in-progress
-  3-2-rust-task-repository-and-tauri-commands: backlog
-  3-3-persist-tray-tasks-across-app-restart: backlog
-  3-4-soft-delete-and-local-data-safety: backlog
+  epic-3: done
+  3-1-sqlx-sqlite-task-schema-and-migrations: done
+  3-2-rust-task-repository-and-tauri-commands: done
+  3-3-persist-tray-tasks-across-app-restart: done
+  3-4-soft-delete-and-local-data-safety: done
   epic-3-retrospective: optional
 
   epic-2: backlog

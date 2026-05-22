@@ -11,15 +11,7 @@
   },
   "app": {
     "withGlobalTauri": true,
-    "windows": [
-      {
-        "title": "Taskbar Todolist",
-        "width": 340,
-        "height": 420,
-        "resizable": false,
-        "visible": false
-      }
-    ],
+    "windows": [],
     "security": {
       "csp": null
     }

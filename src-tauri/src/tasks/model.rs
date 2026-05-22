@@ -1,6 +1,7 @@
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
+use std::str::FromStr;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
@@ -14,6 +15,18 @@ impl TaskStatus {
         match self {
             Self::Todo => "todo",
             Self::Done => "done",
+        }
+    }
+}
+
+impl FromStr for TaskStatus {
+    type Err = ();
+
+    fn from_str(value: &str) -> Result<Self, Self::Err> {
+        match value {
+            "todo" => Ok(Self::Todo),
+            "done" => Ok(Self::Done),
+            _ => Err(()),
         }
     }
 }

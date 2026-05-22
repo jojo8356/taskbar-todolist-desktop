@@ -114,13 +114,16 @@ GPT-5
 ### Completion Notes List
 
 - Ultimate context engine analysis completed - comprehensive developer guide created.
-- Implemented Rust-owned tray lifecycle in `src-tauri/src/app/tray.rs` with a reliable Linux tray menu path: `Open Taskbar Todolist`.
+- Implemented Rust-owned tray lifecycle in `src-tauri/src/app/tray.rs`; tray activation opens the compact panel.
+- Replaced the deprecated Tauri/libayatana appindicator tray backend with a direct Linux StatusNotifierItem implementation over D-Bus via `zbus`.
 - Implemented Rust-owned panel show/hide/focus lifecycle in `src-tauri/src/app/windows.rs`; close requests hide the panel instead of quitting the app.
 - Replaced the starter greeting UI with a compact Vanilla TypeScript tray panel shell and autofocus input.
 - Added Lucide UI icons through the vanilla `lucide` package using targeted imports only.
 - Installed rustup user toolchain during validation; `rustc 1.95.0`, `cargo 1.95.0`, and `rustfmt 1.9.0-stable` are now available.
 - `pnpm build` passes.
-- `pnpm tauri dev` now passes the previous Rust version blocker and reaches native crate compilation. Current actionable blocker is missing system package support for `dbus-1.pc`; install `libdbus-1-dev` and `pkg-config` on Debian/Ubuntu-family systems.
+- `cargo tree --manifest-path src-tauri/Cargo.toml -i libappindicator` prints no active dependency.
+- `timeout 20s pnpm tauri dev` starts the app without the previous `libayatana-appindicator` deprecation warning.
+- `pnpm tauri dev` now starts successfully with local vendored native pkg-config support for the required Linux build dependencies.
 
 ### File List
 
@@ -146,3 +149,4 @@ GPT-5
 
 - 2026-05-19: Implemented Story 1.2 tray lifecycle, compact panel shell, Lucide UI icons, and validation updates.
 - 2026-05-19: Addressed code review findings: tray setup now fails explicitly without a default icon, and UI lifecycle commands route through `src/state/app-commands.ts`.
+- 2026-05-22: Migrated Linux tray implementation from the deprecated libayatana appindicator path to direct StatusNotifierItem registration with `zbus`.

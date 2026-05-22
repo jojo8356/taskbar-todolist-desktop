@@ -12,6 +12,7 @@ dist
 dist-ssr
 build
 target
+vendor/dbus-1-dev/
 *.local
 .env
 .env.*

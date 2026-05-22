@@ -195,3 +195,57 @@ h1 {
   line-height: 18px;
   text-align: center;
 }
+
+.tasks-region {
+  min-height: 0;
+  flex: 1 1 auto;
+  overflow: hidden;
+}
+
+.task-list {
+  display: flex;
+  height: 100%;
+  flex-direction: column;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  list-style: none;
+}
+
+.task-row {
+  display: flex;
+  min-height: 36px;
+  align-items: center;
+  gap: 8px;
+  padding: 2px 2px 2px 10px;
+  background: #ffffff;
+  border: 1px solid #dce4ee;
+  border-radius: 6px;
+}
+
+.task-row:hover {
+  background: #f2f6fa;
+}
+
+.task-row__text {
+  min-width: 0;
+  flex: 1 1 auto;
+  overflow: hidden;
+  color: #1d2430;
+  font-size: 14px;
+  line-height: 20px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.task-row__delete {
+  width: 30px;
+  height: 30px;
+}
+
+.task-row__delete:hover {
+  color: #842727;
+  background: #f9eeee;
+  border-color: #e5b8b8;
+}
