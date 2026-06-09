@@ -56,7 +56,7 @@ The NFRs that shape architecture are:
 - sync failures must not delete or corrupt local data;
 - no account, cloud, or internet dependency for MVP operation;
 - explicit sync trigger/acceptance for MVP sync;
-- Tauri/Linux tray behavior must be proven before mobile or sync work;
+- Rust native Linux tray behavior must be proven before mobile or sync work;
 - Phase 1 must remain implementable without backend, app mobile, or external service.
 
 **Scale & Complexity:**
@@ -67,7 +67,7 @@ The NFRs that shape architecture are:
 
 Likely components:
 
-1. Tauri app shell and lifecycle.
+1. Rust native app shell and lifecycle.
 2. Linux tray/system integration.
 3. Quick tray panel UI.
 4. Full editing window UI.
@@ -79,9 +79,11 @@ Likely components:
 
 Known constraints:
 
-- Desktop technology is Tauri.
+- Desktop technology is Rust native desktop.
+- Tauri, WebGTK/WebKit, webviews, Vite, pnpm, and browser-based UI runtimes are removed from the target stack.
+- The UI must use a complete but lightweight Rust UI module; the selected Phase 1 UI module is Slint.
 - Primary MVP platform is Linux.
-- The architecture must choose and document a concrete Linux validation baseline for tray/AppIndicator support.
+- The concrete Linux validation baseline is Debian GNU/Linux 13 (trixie), GNOME, X11 session, with GNOME AppIndicator/KStatusNotifierItem extension support for tray validation.
 - Phase 1 must work offline and without account/cloud/backend.
 - The tray prototype is the first technical risk and should be front-loaded.
 - Local persistence should use a structured model suitable for future sync.
@@ -90,58 +92,56 @@ Known constraints:
 
 ### Persistence Technology Decision Notes
 
-Phase 1 persistence should use SQLite from the Rust/Tauri side, with SQLx as the preferred database access layer.
+Phase 1 persistence should use SQLite from the Rust application side, with SQLx as the preferred database access layer.
 
 Decision:
 
 - Use Rust-side SQLite persistence with SQLx.
-- Expose task operations to the frontend through Tauri commands.
+- Expose task operations to the UI through Rust service/controller modules, not through Tauri commands or webview IPC.
 - Do not use Prisma, Drizzle, Kysely, MikroORM, TypeORM, or other Node/TypeScript ORMs in Phase 1.
 - Do not add a Node sidecar just to run a Prisma-like ORM.
 
 Rationale:
 
-- Tauri does not provide a normal Node runtime inside the frontend, so Node-centric SQLite ORMs fit Electron better than Tauri.
-- SQLx works naturally in `src-tauri`, keeps persistence native, and avoids an extra runtime process.
+- The app must stay light and close to the Linux system; removing webview/WebGTK avoids a heavy UI runtime for a small tray utility.
+- SQLx works naturally in a Rust-native app, keeps persistence native, and avoids an extra runtime process.
 - The task model is small enough that a full entity ORM is unnecessary.
 - Rust-side persistence keeps local data safety, migrations, and command boundaries close to the native shell.
 - This supports the Phase 2 sync-ready data model without forcing sync implementation into Phase 1.
 
 Alternatives considered:
 
-| Option | Fit for Tauri SQLite | Prisma-like DX | Runtime weight | Decision |
+| Option | Fit for Rust SQLite | Prisma-like DX | Runtime weight | Decision |
 | --- | --- | --- | --- | --- |
 | SQLx | Excellent | Medium | Low | Selected |
 | Diesel | Good | Medium | Medium | Possible fallback if a fuller Rust ORM is needed |
 | SeaORM | Medium | Good | Higher | Too web-service oriented for MVP |
-| Drizzle + better-sqlite3 | Poor in pure Tauri | Good | Requires Node runtime | Rejected for Phase 1 |
-| Prisma SQLite | Poor in pure Tauri | Excellent | Requires Prisma/client runtime fit | Rejected for Phase 1 |
-| Kysely | Poor in pure Tauri | Good | Node-centric | Rejected for Phase 1 |
-| MikroORM | Poor in pure Tauri | Good | Higher | Rejected for Phase 1 |
-| TypeORM | Poor in pure Tauri | Medium | Higher | Rejected for Phase 1 |
+| Drizzle + better-sqlite3 | Poor in Rust-native app | Good | Requires Node runtime | Rejected for Phase 1 |
+| Prisma SQLite | Poor in Rust-native app | Excellent | Requires Prisma/client runtime fit | Rejected for Phase 1 |
+| Kysely | Poor in Rust-native app | Good | Node-centric | Rejected for Phase 1 |
+| MikroORM | Poor in Rust-native app | Good | Higher | Rejected for Phase 1 |
+| TypeORM | Poor in Rust-native app | Medium | Higher | Rejected for Phase 1 |
 
 Initial persistence module shape:
 
 ```text
-src-tauri/src/tasks/
+src/tasks/
   model.rs
   repository.rs
   migrations.rs
-  commands.rs
+  service.rs
 ```
 
-Frontend command boundary:
+Rust UI/service boundary:
 
-```ts
-await invoke("create_task", { text })
-await invoke("list_tasks")
-await invoke("update_task", { id, text, status })
-await invoke("delete_task", { id })
+```text
+UI event -> app controller -> tasks service -> repository -> SQLite
 ```
 
 Sources checked:
 
-- Tauri SQL plugin: https://v2.tauri.app/plugin/sql/
+- Slint Rust UI: https://slint.dev/
+- tray-icon crate: https://crates.io/crates/tray-icon
 - SQLx SQLite: https://docs.rs/sqlx/latest/sqlx/sqlite/
 - Diesel: https://diesel.rs/
 - SeaORM: https://www.sea-ql.org/SeaORM/docs/index/
@@ -163,134 +163,120 @@ Sources checked:
 - **Future sync readiness:** task model and storage should support Phase 2 without forcing Phase 2 implementation now.
 - **UI consistency:** tray panel and full UI should follow the UX spec's compact native design system.
 
-## Starter Template Evaluation
+## Rust Native Stack Evaluation
 
 ### Primary Technology Domain
 
 Desktop app, based on the project requirements analysis.
 
-The project is a Linux-first Tauri desktop utility with a compact tray panel, full editing window, local persistence, and future sync readiness. Phase 1 does not need a backend, account system, cloud service, routing framework, server rendering, or mobile app scaffold.
+The project is a Linux-first Rust native desktop utility with a compact tray panel, full editing window, local persistence, and future sync readiness. Phase 1 does not need a backend, account system, cloud service, routing framework, server rendering, webview runtime, or mobile app scaffold.
 
-### Starter Options Considered
+### UI Options Considered
 
-**Official Tauri Vanilla TypeScript**
+**Rust + Slint**
 
-This starter provides the lightest official Tauri foundation: Rust/Tauri shell, Vite-based frontend, TypeScript frontend option, and minimal UI assumptions. It fits the product because the Phase 1 UI is intentionally small: tray panel, task input, task rows, row delete action, and full edit window.
-
-Trade-offs:
-
-- Best fit for validating the Linux tray risk early.
-- Keeps frontend architecture simple.
-- Avoids React/Vue/Svelte decisions before the core desktop behavior is proven.
-- Requires manually defining lightweight component/module conventions.
-
-**Official Tauri React TypeScript**
-
-This starter would provide a familiar component model for `TrayPanel`, `TaskInput`, `TaskRow`, and `FullEditWindow`.
+Slint provides a complete Rust-friendly UI module without a browser/webview layer. It fits the product because the UI is compact but should still have a real component model for the tray panel, task input, task rows, row delete action, and full edit window.
 
 Trade-offs:
 
-- Better if the UI grows into a richer app later.
-- More dependencies and framework conventions than Phase 1 requires.
-- Can be introduced later if Vanilla TypeScript becomes limiting.
+- Keeps the app close to the system and avoids WebGTK/WebKit runtime weight.
+- Gives a complete UI layer instead of hand-rolling every widget in raw platform calls.
+- Keeps the implementation Rust-first across shell, UI coordination, persistence, and local behavior.
+- Requires validating tray/panel behavior with `tray-icon` and the selected Linux baseline.
 
-**Manual Vite + Tauri Setup**
+**egui/eframe**
 
-Manual setup would allow maximum control but adds unnecessary setup decisions before the tray prototype is proven.
+This option is very lightweight and Rust-native, but its immediate-mode model is less aligned with a polished compact desktop utility and separate full-edit UI.
 
 Trade-offs:
 
-- Flexible, but not needed.
-- Higher chance of inconsistent setup.
-- Less aligned with using official maintained templates.
+- Very light runtime.
+- Fast to prototype.
+- Less complete as a conventional desktop UI module for this product.
 
-### Selected Starter: Official Tauri Vanilla TypeScript
+**Tauri + Vanilla TypeScript**
+
+This was previously selected, but it depends on a webview stack and Linux WebGTK/WebKit prerequisites. It no longer matches the updated requirement to keep the app light, Rust-first, and close to the system.
+
+Trade-offs:
+
+- Good ecosystem and tray support.
+- Rejected because the UI runtime is webview/WebGTK-based.
+- Rejected because the target stack should avoid TypeScript/Vite/pnpm for the app UI.
+
+### Selected Stack: Rust Native + Slint UI
 
 **Rationale for Selection:**
 
-Use the official Tauri Vanilla TypeScript starter for Phase 1. The architecture should optimize for proving Tauri Linux tray behavior, local persistence, and the compact interaction loop before introducing frontend framework complexity.
+Use a Rust-native desktop stack for Phase 1: Rust application shell, Slint UI, `tray-icon` for Linux tray integration, SQLx + SQLite for persistence.
 
-The UX spec describes components, but the interaction surface is small enough to implement with TypeScript modules and explicit DOM/state boundaries. Tailwind can be added for the compact native design system without requiring a larger UI framework.
+The UX spec describes a compact but real desktop interface. Slint gives a complete lightweight UI module without carrying a browser runtime. The app stays close to Linux system behavior, and the tray/persistence paths remain Rust-native.
 
-Persistence is intentionally not handled by a Node/TypeScript ORM. SQLite persistence belongs in `src-tauri` with SQLx, exposed to the frontend through Tauri commands.
+Persistence is intentionally not handled by a Node/TypeScript ORM. SQLite persistence belongs in Rust modules with SQLx, exposed to the UI through Rust application services/controllers.
 
 **Initialization Command:**
 
 ```bash
-pnpm create tauri-app taskbar-todolist-desktop
-```
-
-Prompt selections:
-
-```text
-Frontend language: TypeScript / JavaScript
-Package manager: pnpm
-UI template: Vanilla
-UI flavor: TypeScript
+cargo init taskbar-todolist-desktop --bin
 ```
 
 Then run:
 
 ```bash
 cd taskbar-todolist-desktop
-pnpm install
-pnpm tauri dev
+cargo run
 ```
 
-**Architectural Decisions Provided by Starter:**
+**Architectural Decisions Provided by Stack:**
 
 **Language & Runtime:**
 
-- Rust backend through Tauri.
-- TypeScript frontend.
-- Native desktop shell controlled by Tauri.
-- Frontend served through Vite during development.
+- Rust application shell.
+- Slint UI module.
+- Native desktop behavior coordinated from Rust.
+- No webview, no WebGTK/WebKit, no Vite, no TypeScript UI runtime, no pnpm app workflow.
 
 **Styling Solution:**
 
-The starter does not impose the final styling system. Add Tailwind CSS after initialization to implement the UX spec's compact design tokens, spacing, colors, and utility-first styling.
+Use Slint components/styles to implement the UX spec's compact design tokens, spacing, colors, low radius, light theme first, and destructive red only for destructive actions.
 
 **Build Tooling:**
 
-- Vite frontend build pipeline.
-- Tauri development and build commands.
-- Rust/Cargo native app build pipeline.
+- Cargo development and build pipeline.
+- Rust/Cargo native app packaging path.
 
 **Testing Framework:**
 
-The starter does not make a complete testing decision. Architecture should define testing separately:
+Architecture should define testing separately:
 
 - Rust unit tests for task repository and persistence behavior.
-- Frontend unit tests for task state and UI event behavior.
+- Rust/UI-controller tests for task state and UI event behavior where practical.
 - Manual MVP validation for Linux tray behavior.
 - Later E2E or scripted smoke tests once the tray prototype is stable.
 
 **Code Organization:**
 
-The starter should be evolved into these boundaries:
+The app should be evolved into these boundaries:
 
-- `src/main.ts` for frontend bootstrapping only.
-- `src/ui/` for tray panel and full edit UI modules.
-- `src/state/` for task state and commands called by UI.
-- `src-tauri/src/` for Tauri setup, tray lifecycle, commands, persistence, and app lifecycle.
-- `src-tauri/src/tasks/` for task model, repository, migrations, commands, and SQLx persistence logic.
+- `src/main.rs` for app bootstrapping only.
+- `src/app/` for lifecycle, tray, windows, and app state.
+- `src/ui/` for Slint integration, tray panel, full edit UI bindings, and UI event adapters.
+- `src/tasks/` for task model, repository, migrations, service/controller functions, and SQLx persistence logic.
 
 **Development Experience:**
 
-- Use `pnpm tauri dev` for local development.
-- First implementation story should scaffold the app and prove tray creation on the target Linux environment.
-- Add Tailwind only after the base Tauri app runs.
+- Use `cargo run` for local development.
+- First implementation story should scaffold the Rust app and prove tray creation on the target Linux environment.
+- Add the Slint UI module early enough to validate the compact tray panel without introducing web runtime weight.
 - Add SQLite/SQLx persistence only after tray lifecycle is proven.
 
-**Additional Setup Decisions Deferred From Starter:**
+**Additional Setup Decisions Deferred From Stack:**
 
-- Tailwind CSS setup.
 - SQLx migration setup.
-- Exact Linux validation baseline for tray/AppIndicator.
 - Test framework selection.
 - Packaging strategy.
 
-**Note:** Project initialization using this command should be the first implementation story.
+**Note:** Rust-native project initialization using this command should be the first implementation story.
 
 ## Core Architectural Decisions
 
@@ -298,18 +284,18 @@ The starter should be evolved into these boundaries:
 
 **Critical Decisions (Block Implementation):**
 
-- Use Tauri v2 as the desktop shell.
-- Use the official Tauri Vanilla TypeScript starter.
+- Use a Rust-native desktop shell, not Tauri.
+- Use Slint as the complete but lightweight Rust UI module.
+- Use `tray-icon` or equivalent lightweight Rust tray integration for Linux system tray behavior.
 - Use Rust-side SQLite persistence with SQLx.
-- Expose all task persistence operations through Tauri commands.
+- Expose all task persistence operations through Rust service/controller functions.
 - Validate Linux tray/AppIndicator behavior before implementing full persistence, mobile, or sync.
 - Keep Phase 1 offline-only and backend-free.
 
 **Important Decisions (Shape Architecture):**
 
-- Use a compact TypeScript frontend with explicit modules instead of a frontend framework in Phase 1.
-- Use Tailwind CSS v4 for the compact native UI system after base Tauri startup is proven.
-- Keep tray panel UI and full edit UI separate but backed by the same task command/state boundary.
+- Use a compact Slint UI with explicit Rust adapters in Phase 1.
+- Keep tray panel UI and full edit UI separate but backed by the same Rust service/state boundary.
 - Use a sync-ready task model from Phase 1: stable ID, text, status, created/updated timestamps, and deletion marker.
 - Use soft-delete/tombstone semantics internally for deleted tasks, while hiding deleted tasks from active lists.
 
@@ -327,10 +313,10 @@ The starter should be evolved into these boundaries:
 SQLite local file, accessed from Rust through SQLx.
 
 **Rationale:**
-SQLite matches the local-first/offline requirement. SQLx fits Tauri because persistence lives naturally in `src-tauri`, avoids a Node sidecar, and keeps data safety close to the native command boundary.
+SQLite matches the local-first/offline requirement. SQLx fits a Rust-native app because persistence lives naturally in Rust task modules, avoids a Node sidecar, and keeps data safety close to the native UI/service boundary.
 
 **Rejected for Phase 1:**
-Prisma, Drizzle, Kysely, MikroORM, TypeORM, and other Node/TypeScript ORMs. These fit Node/Electron-style runtime assumptions better than pure Tauri.
+Prisma, Drizzle, Kysely, MikroORM, TypeORM, and other Node/TypeScript ORMs. These fit Node/Electron-style runtime assumptions better than a Rust-native desktop app.
 
 **Task Model:**
 
@@ -345,20 +331,20 @@ Task
 ```
 
 **Migration Approach:**
-Use SQLx migrations under `src-tauri/migrations` or an equivalent Rust-side migrations folder. Migrations must run during app startup before task commands become available.
+Use SQLx migrations under `migrations/` or an equivalent Rust-side migrations folder. Migrations must run during app startup before task services become available.
 
 **Repository Boundary:**
 
 ```text
-src-tauri/src/tasks/
+src/tasks/
   model.rs
   repository.rs
   migrations.rs
-  commands.rs
+  service.rs
 ```
 
 **Caching Strategy:**
-No separate cache in Phase 1. The frontend may hold an in-memory task list for UI rendering, but SQLite remains the source of truth.
+No separate cache in Phase 1. The Rust UI state may hold an in-memory task list for rendering, but SQLite remains the source of truth.
 
 ### Authentication & Security
 
@@ -369,7 +355,7 @@ None in Phase 1.
 None in Phase 1 because there is no multi-user model.
 
 **Data Location:**
-Store the SQLite database in the app data directory managed from the Tauri side.
+Store the SQLite database in the app data directory managed from the Rust app shell.
 
 **Cloud/Data Egress:**
 No cloud sync, account, analytics, telemetry, or default external data transfer in Phase 1.
@@ -377,22 +363,22 @@ No cloud sync, account, analytics, telemetry, or default external data transfer 
 **Data Safety:**
 Task writes must be transactional. Deletes are represented with `deleted_at` rather than destructive removal so Phase 2 sync can propagate deletions.
 
-### API & Communication Patterns
+### Application Communication Patterns
 
-**Frontend-to-Backend Boundary:**
-Use Tauri commands as the only frontend persistence boundary.
+**UI-to-Service Boundary:**
+Use Rust service/controller functions as the only UI persistence boundary.
 
-Initial commands:
+Initial service operations:
 
-```ts
-await invoke("create_task", { text })
-await invoke("list_tasks")
-await invoke("update_task", { id, text, status })
-await invoke("delete_task", { id })
+```text
+create_task(text)
+list_tasks()
+update_task(id, text, status)
+delete_task(id)
 ```
 
 **Error Handling:**
-Rust commands return typed success/error results. Frontend maps errors to compact status messages.
+Rust services return typed success/error results. UI adapters map errors to compact status messages.
 
 **External API:**
 No HTTP/REST/GraphQL API in Phase 1.
@@ -400,38 +386,41 @@ No HTTP/REST/GraphQL API in Phase 1.
 **Future Sync Boundary:**
 Define sync as a future service boundary behind Rust-side modules. Phase 1 data model must support sync, but Phase 1 implementation must not depend on sync.
 
-### Frontend Architecture
+### UI Architecture
 
 **Framework:**
-Vanilla TypeScript with explicit modules for Phase 1.
+Slint UI with explicit Rust adapters for Phase 1.
 
 **Rationale:**
-The UI is intentionally small. Avoiding React/Vue/Svelte keeps attention on tray behavior, persistence, and the core add/delete loop.
+The UI is intentionally small but should not be hand-rolled from raw platform calls. Slint keeps a complete lightweight UI module while avoiding Tauri, WebGTK/WebKit, browser runtime weight, and frontend framework overhead.
 
 **UI Modules:**
 
 ```text
 src/
-  main.ts
+  main.rs
+  app/
+    lifecycle.rs
+    tray.rs
+    windows.rs
+    state.rs
   ui/
-    tray-panel.ts
-    task-input.ts
-    task-list.ts
-    task-row.ts
-    full-edit-window.ts
-    status-message.ts
-  state/
-    task-store.ts
-    task-commands.ts
-  styles/
-    main.css
+    mod.rs
+    tray_panel.rs
+    full_edit.rs
+    bindings.rs
+  tasks/
+    model.rs
+    repository.rs
+    migrations.rs
+    service.rs
 ```
 
 **State Management:**
-Small custom task store in TypeScript. It mirrors task data returned by Tauri commands but does not replace SQLite as source of truth.
+Small Rust app state/controller layer. It mirrors task data for UI rendering but does not replace SQLite as source of truth.
 
 **Styling:**
-Tailwind CSS v4 after Tauri startup is proven. Use UX spec tokens: compact spacing, low radius, light theme first, red only for destructive actions.
+Use Slint styling and component properties. Use UX spec tokens: compact spacing, low radius, light theme first, red only for destructive actions.
 
 **Routing:**
 No router in Phase 1. The app has a tray panel and full edit window, not a multi-page application.
@@ -442,27 +431,35 @@ No router in Phase 1. The app has a tray panel and full edit window, not a multi
 None.
 
 **Build/Runtime:**
-Tauri build pipeline with Vite frontend and Rust backend.
+Rust/Cargo build pipeline with Slint UI and Rust-native tray integration. No Tauri, no WebGTK/WebKit, no Vite, no pnpm app workflow.
+
+**Developer Linux Stack:**
+
+- Primary developer environment: Debian GNU/Linux 13 (trixie), x86_64, Linux kernel 6.12.x.
+- Desktop/session baseline: GNOME on X11.
+- Tray/AppIndicator support: GNOME AppIndicator/KStatusNotifierItem extension.
+- Package family for native prerequisites: Debian/Ubuntu packages.
+- Native dependency expectation: Rust toolchain, Cargo, build tooling, `libssl-dev`, `libdbus-1-dev`, `libayatana-appindicator3-dev`, `librsvg2-dev`, and `pkg-config`. Do not add WebGTK/WebKit prerequisites.
+- Validation posture: test and debug Linux behavior first on this environment before generalizing to other desktop environments, Wayland sessions, Windows, or macOS.
 
 **Development Commands:**
 
 ```bash
-pnpm create tauri-app taskbar-todolist-desktop
-pnpm install
-pnpm tauri dev
+cargo init taskbar-todolist-desktop --bin
+cargo run
 ```
 
 **Validation Baseline:**
-Architecture must name one MVP Linux desktop environment with working tray/AppIndicator support before implementation stories begin.
+Use Debian GNU/Linux 13 (trixie), GNOME X11, with GNOME AppIndicator/KStatusNotifierItem extension as the MVP Linux tray validation baseline.
 
 **Implementation Sequence:**
 
-1. Scaffold Tauri Vanilla TypeScript app.
+1. Scaffold Rust native app with Slint UI module and lightweight tray integration.
 2. Prove Linux tray icon, panel opening, focus behavior, and background lifecycle.
 3. Add compact tray UI skeleton.
 4. Add Rust task model and SQLx SQLite migrations.
-5. Add Tauri task commands.
-6. Connect frontend task store to Tauri commands.
+5. Add Rust task service/controller functions.
+6. Connect Slint UI adapters to Rust task services.
 7. Add full edit window.
 8. Add persistence/restart validation.
 9. Defer mobile/sync.
@@ -474,11 +471,11 @@ The tray prototype comes before persistence because system tray reliability is t
 
 **Cross-Component Dependencies:**
 
-- Tray panel depends on Tauri lifecycle and frontend task store.
-- Full edit window depends on the same task command boundary as the tray panel.
+- Tray panel depends on Rust app lifecycle, tray integration, and Rust UI state.
+- Full edit window depends on the same Rust service/state boundary as the tray panel.
 - SQLx repository depends on migrations and task model.
 - Future sync depends on stable IDs, timestamps, and deletion markers.
-- UI consistency depends on shared CSS/Tailwind tokens and compact component conventions.
+- UI consistency depends on shared Slint styling tokens and compact component conventions.
 
 ## Implementation Patterns & Consistency Rules
 
@@ -489,12 +486,12 @@ Nine areas where AI agents could make incompatible choices:
 
 1. Database naming.
 2. Rust model naming.
-3. TypeScript model naming.
-4. Tauri command naming and payloads.
+3. UI adapter model naming.
+4. Rust service naming and payloads.
 5. Soft-delete behavior.
 6. Error response format.
 7. Date/time format.
-8. Frontend state ownership.
+8. UI state ownership.
 9. File and test organization.
 
 ### Naming Patterns
@@ -533,7 +530,7 @@ Rules:
 - Types: `PascalCase`, e.g. `Task`, `TaskStatus`, `TaskRepository`.
 - Functions: `snake_case`, e.g. `create_task`, `list_tasks`.
 - Fields: `snake_case`, matching database fields where practical.
-- Tauri command functions: snake_case and action-oriented.
+- Service/controller functions: snake_case and action-oriented.
 
 Rust model baseline:
 
@@ -548,29 +545,27 @@ pub struct Task {
 }
 ```
 
-**TypeScript Naming Conventions:**
+**UI Adapter Naming Conventions:**
 
-Use TypeScript idioms at the frontend boundary.
+Use Rust idioms at the UI boundary.
 
 Rules:
 
-- Types/interfaces: `PascalCase`, e.g. `Task`, `TaskStatus`.
-- Functions: `camelCase`, e.g. `createTask`, `listTasks`.
-- Fields exposed to UI: `camelCase`, e.g. `createdAt`, `deletedAt`.
-- Files: kebab-case, e.g. `task-store.ts`, `tray-panel.ts`.
+- Types: `PascalCase`, e.g. `Task`, `TaskStatus`.
+- Functions: `snake_case`, e.g. `create_task`, `list_tasks`.
+- Fields exposed to UI adapters: `snake_case`, e.g. `created_at`, `deleted_at`.
+- Files: snake_case, e.g. `task_service.rs`, `tray_panel.rs`.
 
-Frontend model baseline:
+UI model baseline:
 
-```ts
-export type TaskStatus = "todo" | "done";
-
-export interface Task {
-  id: string;
-  text: string;
-  status: TaskStatus;
-  createdAt: string;
-  updatedAt: string;
-  deletedAt: string | null;
+```rust
+pub struct TaskView {
+    pub id: String,
+    pub text: String,
+    pub status: TaskStatus,
+    pub created_at: String,
+    pub updated_at: String,
+    pub deleted_at: Option<String>,
 }
 ```
 
@@ -578,75 +573,59 @@ export interface Task {
 
 **Project Organization:**
 
-Rust/Tauri:
+Rust native app:
 
 ```text
-src-tauri/src/
+src/
   main.rs
   tasks/
     mod.rs
     model.rs
     repository.rs
     migrations.rs
-    commands.rs
+    service.rs
   app/
     tray.rs
     windows.rs
     errors.rs
-```
-
-Frontend:
-
-```text
-src/
-  main.ts
   ui/
-    tray-panel.ts
-    task-input.ts
-    task-list.ts
-    task-row.ts
-    full-edit-window.ts
-    status-message.ts
-  state/
-    task-store.ts
-    task-commands.ts
-  styles/
-    main.css
+    mod.rs
+    tray_panel.rs
+    full_edit.rs
+    bindings.rs
 ```
 
 **File Structure Patterns:**
 
-- Domain logic lives in `src-tauri/src/tasks/`.
-- Tray lifecycle logic lives in `src-tauri/src/app/tray.rs`.
-- Window creation and show/hide behavior lives in `src-tauri/src/app/windows.rs`.
-- Frontend modules must not access SQLite directly.
-- Frontend modules must call `state/task-commands.ts`, not raw `invoke(...)` everywhere.
+- Domain logic lives in `src/tasks/`.
+- Tray lifecycle logic lives in `src/app/tray.rs`.
+- Window creation and show/hide behavior lives in `src/app/windows.rs`.
+- UI modules must not access SQLite directly.
+- UI modules must call Rust task service/controller functions, not repository functions directly.
 
 **Test Organization:**
 
 Rust:
 
 - Unit tests live near the module under `#[cfg(test)]`.
-- Persistence integration tests can live under `src-tauri/tests/` once the schema stabilizes.
+- Persistence integration tests can live under `tests/` once the schema stabilizes.
 
-TypeScript:
-
-- UI/state unit tests should use `*.test.ts` next to the module or under `src/**/*.test.ts`.
-- Do not add browser E2E tests until tray behavior is proven manually.
+- UI/controller tests should stay in Rust test modules or integration tests.
+- Do not add browser E2E tests because the app no longer uses a browser/webview UI.
 
 ### Format Patterns
 
-**Tauri Command Response Formats:**
+**Rust Service Response Formats:**
 
-Rust commands should return `Result<T, AppError>`.
+Rust services should return `Result<T, AppError>`.
 
-Frontend command wrappers convert Rust response/error into UI-friendly results.
+UI adapters convert Rust response/error into UI-friendly results.
 
-TypeScript wrapper pattern:
+Rust service pattern:
 
-```ts
-export async function createTask(text: string): Promise<Task> {
-  return invoke<Task>("create_task", { text });
+```rust
+pub async fn create_task(text: String, state: &AppState) -> Result<TaskView, AppError> {
+    state.tasks.create(text).await.map(TaskView::from)
 }
 ```
 
@@ -683,17 +662,17 @@ Rules:
 
 - Store timestamps as UTC ISO strings.
 - Never store localized display strings in SQLite.
-- Format for display only in the frontend UI layer.
+- Format for display only in the UI layer.
 
 **Data Exchange Format:**
 
 - Rust/database fields may be snake_case internally.
-- Tauri command DTOs exposed to TypeScript should use camelCase.
-- Do conversion at the command boundary, not throughout UI modules.
+- UI view fields should remain Rust/Slint-friendly and explicit.
+- Do conversion at the service/UI adapter boundary, not throughout UI modules.
 
 ### Communication Patterns
 
-**Tauri Command Naming:**
+**Rust Service Naming:**
 
 Use action-oriented snake_case:
 
@@ -718,23 +697,23 @@ close_tray_panel
 get_app_status
 ```
 
-**Command Payloads:**
+**Service Payloads:**
 
 Payloads must be minimal and explicit.
 
-```ts
-create_task: { text: string }
-update_task: { id: string; text?: string; status?: TaskStatus }
-delete_task: { id: string }
-list_tasks: no payload
+```text
+create_task(text)
+update_task(id, text?, status?)
+delete_task(id)
+list_tasks()
 ```
 
 **State Management Patterns:**
 
 - SQLite is the source of truth.
-- `task-store.ts` is a frontend cache for rendering and UI responsiveness.
-- After a mutation command succeeds, update the frontend store from the command result or reload the list.
-- Do not let UI-only state mutate task records without a successful Tauri command.
+- Rust app/UI state is a cache for rendering and UI responsiveness.
+- After a mutation service succeeds, update UI state from the service result or reload the list.
+- Do not let UI-only state mutate task records without a successful Rust service call.
 
 ### Process Patterns
 
@@ -777,21 +756,21 @@ Rules:
 
 **All AI Agents MUST:**
 
-- Keep SQLite access inside `src-tauri`.
+- Keep SQLite access inside Rust task repository modules.
 - Use SQLx for SQLite persistence.
-- Use Tauri commands as the frontend/backend boundary.
+- Use Rust service/controller functions as the UI/persistence boundary.
 - Use soft delete through `deleted_at`.
 - Keep Phase 1 free of backend, account, cloud, and sync dependencies.
-- Use snake_case for database/Rust command names and camelCase for TypeScript UI fields.
-- Keep tray panel and full edit UI backed by the same task command/store boundary.
+- Use snake_case for database/Rust names.
+- Keep tray panel and full edit UI backed by the same Rust service/state boundary.
 - Preserve input focus after successful add.
 - Avoid introducing project/tag/priority/calendar concepts.
 
 **Pattern Enforcement:**
 
-- Any new task persistence function must be added to `repository.rs` and exposed through `commands.rs`.
-- Any new frontend task operation must go through `state/task-commands.ts`.
-- Any schema change must include a migration and update Rust/TypeScript task types.
+- Any new task persistence function must be added to `repository.rs` and exposed through `service.rs`.
+- Any new UI task operation must go through Rust service/controller modules.
+- Any schema change must include a migration and update Rust task/UI adapter types.
 - Any user-facing error must map from a stable error code.
 - Any Phase 2 sync-related code must remain behind explicit module boundaries and must not be required for Phase 1 tests.
 
@@ -800,17 +779,15 @@ Rules:
 **Good Examples:**
 
 ```rust
-#[tauri::command]
-pub async fn create_task(text: String, state: State<'_, AppState>) -> Result<TaskDto, AppError> {
-    state.tasks.create(text).await.map(TaskDto::from)
+pub async fn create_task(text: String, state: &AppState) -> Result<TaskView, AppError> {
+    state.tasks.create(text).await.map(TaskView::from)
 }
 ```
 
-```ts
-const task = await createTask(input.value);
-taskStore.add(task);
-input.value = "";
-input.focus();
+```rust
+let task = task_service.create_task(input_text).await?;
+ui_state.add_task(task);
+ui_state.clear_input_and_focus();
 ```
 
 ```sql
@@ -850,43 +827,33 @@ taskbar-todolist-desktop/
 │   ├── ui/
 │   │   ├── tray-panel.ts
 │   │   ├── task-input.ts
-│   │   ├── task-list.ts
-│   │   ├── task-row.ts
-│   │   ├── full-edit-window.ts
-│   │   └── status-message.ts
-│   ├── state/
-│   │   ├── task-store.ts
-│   │   └── task-commands.ts
-│   ├── types/
-│   │   └── task.ts
-│   └── styles/
-│       └── main.css
-├── src-tauri/
-│   ├── Cargo.toml
-│   ├── tauri.conf.json
-│   ├── capabilities/
-│   │   └── default.json
-│   ├── migrations/
-│   │   └── 0001_create_tasks.sql
-│   ├── icons/
-│   ├── src/
-│   │   ├── main.rs
-│   │   ├── lib.rs
-│   │   ├── app/
-│   │   │   ├── mod.rs
-│   │   │   ├── tray.rs
-│   │   │   ├── windows.rs
-│   │   │   ├── state.rs
-│   │   │   └── errors.rs
-│   │   └── tasks/
-│   │       ├── mod.rs
-│   │       ├── model.rs
-│   │       ├── repository.rs
-│   │       ├── migrations.rs
-│   │       ├── commands.rs
-│   │       └── dto.rs
-│   └── tests/
-│       └── task_repository.rs
+├── Cargo.toml
+├── migrations/
+│   └── 0001_create_tasks.sql
+├── assets/
+│   └── icons/
+├── src/
+│   ├── main.rs
+│   ├── app/
+│   │   ├── mod.rs
+│   │   ├── lifecycle.rs
+│   │   ├── tray.rs
+│   │   ├── windows.rs
+│   │   ├── state.rs
+│   │   └── errors.rs
+│   ├── ui/
+│   │   ├── mod.rs
+│   │   ├── tray_panel.rs
+│   │   ├── full_edit.rs
+│   │   └── bindings.rs
+│   └── tasks/
+│       ├── mod.rs
+│       ├── model.rs
+│       ├── repository.rs
+│       ├── migrations.rs
+│       └── service.rs
+├── tests/
+│   └── task_repository.rs
 ├── docs/
 │   └── product.md
 └── _bmad-output/
@@ -905,13 +872,13 @@ taskbar-todolist-desktop/
 
 There is no HTTP API in Phase 1.
 
-The only application boundary between frontend and persistence is Tauri commands:
+The only application boundary between UI and persistence is Rust service/controller functions:
 
 ```text
-TypeScript UI -> state/task-commands.ts -> Tauri invoke -> Rust commands.rs -> repository.rs -> SQLite
+Slint UI -> ui bindings -> task service -> repository.rs -> SQLite
 ```
 
-Initial command boundary:
+Initial service boundary:
 
 ```text
 create_task
@@ -922,16 +889,15 @@ delete_task
 
 **Component Boundaries:**
 
-Frontend UI modules are small and explicit:
+Rust UI modules are small and explicit:
 
-- `tray-panel.ts` owns tray panel rendering and composition.
-- `task-input.ts` owns input behavior and `Enter` add interaction.
-- `task-list.ts` owns active task list rendering.
-- `task-row.ts` owns one task row and delete action wiring.
-- `full-edit-window.ts` owns the secondary edit surface.
-- `status-message.ts` owns compact user-facing feedback.
+- `ui/tray_panel.rs` owns tray panel rendering/bindings and composition.
+- `ui/bindings.rs` owns input behavior, `Enter` add interaction, and UI-service wiring.
+- `ui/full_edit.rs` owns the secondary edit surface bindings.
+- `app/tray.rs` owns tray menu/control wiring.
+- `app/windows.rs` owns window creation, show/hide, and focus behavior.
 
-Frontend UI modules must not call `invoke(...)` directly. They call functions from `state/task-commands.ts`.
+UI modules must not access SQLite directly. They call Rust task service/controller functions.
 
 **Service Boundaries:**
 
@@ -942,51 +908,47 @@ Rust service boundaries:
 - `app/state.rs`: shared app state, including task repository handle.
 - `app/errors.rs`: `AppError` and error mapping.
 - `tasks/model.rs`: Rust task domain types.
-- `tasks/dto.rs`: command-facing DTOs.
+- `tasks/service.rs`: UI-facing task operations.
 - `tasks/repository.rs`: SQLx persistence operations.
 - `tasks/migrations.rs`: migration execution.
-- `tasks/commands.rs`: Tauri command functions.
 
 **Data Boundaries:**
 
 SQLite is accessed only from Rust.
 
-- SQLite schema lives in `src-tauri/migrations/`.
+- SQLite schema lives in `migrations/`.
 - SQLx queries live in `tasks/repository.rs`.
-- Tauri command DTO conversion lives in `tasks/dto.rs`.
-- TypeScript task types live in `src/types/task.ts`.
+- UI view conversion lives in `tasks/service.rs` or `ui/bindings.rs`.
 
 ### Requirements to Structure Mapping
 
 **Task Management FR1-FR8**
 
-- Rust model: `src-tauri/src/tasks/model.rs`
-- Rust repository: `src-tauri/src/tasks/repository.rs`
-- DTOs: `src-tauri/src/tasks/dto.rs`
-- Frontend type: `src/types/task.ts`
-- UI rendering: `src/ui/task-list.ts`, `src/ui/task-row.ts`
+- Rust model: `src/tasks/model.rs`
+- Rust repository: `src/tasks/repository.rs`
+- UI view types/adapters: `src/tasks/service.rs`, `src/ui/bindings.rs`
+- UI rendering: `src/ui/tray_panel.rs`
 
 **Taskbar / Tray Experience FR9-FR16**
 
-- Tray lifecycle: `src-tauri/src/app/tray.rs`
-- Window lifecycle: `src-tauri/src/app/windows.rs`
-- Tray panel UI: `src/ui/tray-panel.ts`
-- Input behavior: `src/ui/task-input.ts`
-- List/delete UI: `src/ui/task-list.ts`, `src/ui/task-row.ts`
+- Tray lifecycle: `src/app/tray.rs`
+- Window lifecycle: `src/app/windows.rs`
+- Tray panel UI: `src/ui/tray_panel.rs`
+- Input/list/delete behavior: `src/ui/bindings.rs`
 
 **Full Editing UI FR17-FR21**
 
-- Full edit window lifecycle: `src-tauri/src/app/windows.rs`
-- Full edit UI: `src/ui/full-edit-window.ts`
-- Shared task state: `src/state/task-store.ts`
-- Task commands: `src/state/task-commands.ts`
+- Full edit window lifecycle: `src/app/windows.rs`
+- Full edit UI: `src/ui/full_edit.rs`
+- Shared task state: `src/app/state.rs`
+- Task services: `src/tasks/service.rs`
 
 **Local Storage FR22-FR26**
 
-- SQLite migration: `src-tauri/migrations/0001_create_tasks.sql`
-- Migration runner: `src-tauri/src/tasks/migrations.rs`
-- SQLx repository: `src-tauri/src/tasks/repository.rs`
-- Persistence tests: `src-tauri/tests/task_repository.rs`
+- SQLite migration: `migrations/0001_create_tasks.sql`
+- Migration runner: `src/tasks/migrations.rs`
+- SQLx repository: `src/tasks/repository.rs`
+- Persistence tests: `tests/task_repository.rs`
 
 **Mobile Companion / Sync FR27-FR41**
 
@@ -1002,9 +964,9 @@ Phase 1 must still support sync readiness through:
 
 **Settings and Control FR42-FR45**
 
-- Tray menu/control: `src-tauri/src/app/tray.rs`
-- App/window lifecycle: `src-tauri/src/app/windows.rs`
-- Status display: `src/ui/status-message.ts`
+- Tray menu/control: `src/app/tray.rs`
+- App/window lifecycle: `src/app/windows.rs`
+- Status display: `src/ui/bindings.rs`
 
 ### Integration Points
 
@@ -1012,13 +974,12 @@ Phase 1 must still support sync readiness through:
 
 ```text
 User action
--> UI module
--> task-store/task-commands
--> Tauri command
+-> Slint UI binding
+-> Rust task service
 -> Rust repository
 -> SQLite
--> DTO result
--> task-store update
+-> TaskView result
+-> UI state update
 -> UI render
 ```
 
@@ -1079,53 +1040,49 @@ tray-panel.ts opens
 
 **Configuration Files:**
 
-- `package.json`: frontend scripts and package dependencies.
-- `vite.config.ts`: Vite frontend config.
-- `tsconfig.json`: TypeScript config.
-- `src-tauri/Cargo.toml`: Rust dependencies.
-- `src-tauri/tauri.conf.json`: app shell, windows, bundle config.
-- `src-tauri/capabilities/default.json`: Tauri command permissions.
+- `Cargo.toml`: Rust dependencies, Slint UI, tray integration, SQLx.
+- `migrations/`: SQLite schema migrations.
+- `assets/icons/`: app icons.
 - `.env.example`: documented environment variables, if any are introduced.
 
 **Source Organization:**
 
-- `src/` contains frontend-only TypeScript and CSS.
-- `src-tauri/src/` contains Rust-only native logic.
-- `src-tauri/src/tasks/` is the task domain boundary.
-- `src-tauri/src/app/` is the desktop shell/lifecycle boundary.
-- `src/types/` mirrors command DTOs for frontend usage.
+- `src/` contains Rust application, UI, lifecycle, and task modules.
+- `src/tasks/` is the task domain boundary.
+- `src/app/` is the desktop shell/lifecycle boundary.
+- `src/ui/` is the Slint UI integration boundary.
 
 **Test Organization:**
 
 - Rust unit tests live near modules.
-- Rust repository integration tests live in `src-tauri/tests/`.
-- TypeScript unit tests should be co-located as `*.test.ts` once a test runner is selected.
+- Rust repository integration tests live in `tests/`.
+- UI adapter tests stay in Rust test modules or integration tests.
 - No E2E suite until tray lifecycle is proven.
 
 **Asset Organization:**
 
-- App icons live in `src-tauri/icons/`.
-- UI styling lives in `src/styles/main.css`.
+- App icons live in `assets/icons/`.
+- UI styling lives in Slint UI definitions and Rust UI bindings.
 - No large visual asset system is required for Phase 1.
 
 ### Development Workflow Integration
 
-**Development Server Structure:**
+**Development Workflow Structure:**
 
-Use the Tauri dev workflow:
+Use the Rust native dev workflow:
 
 ```bash
-pnpm tauri dev
+cargo run
 ```
 
-Frontend runs through Vite. Native shell runs through Tauri/Cargo.
+The native app, Slint UI, tray integration, and persistence run through Cargo.
 
 **Build Process Structure:**
 
-Use Tauri build pipeline:
+Use Cargo build pipeline:
 
 ```bash
-pnpm tauri build
+cargo build --release
 ```
 
 Packaging decisions are post-MVP unless needed for local validation.
@@ -1134,7 +1091,7 @@ Packaging decisions are post-MVP unless needed for local validation.
 
 No hosted deployment exists in Phase 1.
 
-Distribution is local desktop binary/package only, handled by Tauri when packaging is introduced.
+Distribution is local desktop binary/package only. Packaging is a post-MVP decision.
 
 ## Architecture Validation Results
 
@@ -1143,11 +1100,10 @@ Distribution is local desktop binary/package only, handled by Tauri when packagi
 **Decision Compatibility:**
 The architectural decisions are compatible:
 
-- Tauri v2 supports the selected desktop app model.
-- Vanilla TypeScript matches the compact UI scope.
-- Vite is supplied by the Tauri starter and supports the frontend build.
-- SQLx + SQLite fits Rust-side persistence in `src-tauri`.
-- Tauri commands provide a clean frontend/backend boundary.
+- Rust native shell matches the lightweight system-close target.
+- Slint matches the compact UI scope without WebGTK/WebKit or webviews.
+- SQLx + SQLite fits Rust-side persistence in `src/tasks`.
+- Rust service/controller functions provide a clean UI/persistence boundary.
 - No backend/cloud/account dependency conflicts with the offline MVP requirement.
 
 No contradictory decisions were found.
@@ -1156,18 +1112,18 @@ No contradictory decisions were found.
 Implementation patterns support the decisions:
 
 - SQLite access is constrained to Rust.
-- Frontend command wrappers prevent scattered `invoke(...)` calls.
-- snake_case is used for Rust/database names, camelCase for TypeScript UI models.
+- Rust service/controller functions prevent scattered repository access from UI modules.
+- snake_case is used for Rust/database names.
 - Soft-delete semantics support future sync without requiring sync now.
-- Error codes and DTO boundaries give agents a consistent command contract.
+- Error codes and service boundaries give agents a consistent contract.
 
 **Structure Alignment:**
 The project structure supports the architecture:
 
-- `src/` owns frontend UI/state only.
-- `src-tauri/src/app/` owns desktop shell lifecycle.
-- `src-tauri/src/tasks/` owns task domain and persistence.
-- `src-tauri/migrations/` owns schema evolution.
+- `src/app/` owns desktop shell lifecycle.
+- `src/ui/` owns Slint UI integration.
+- `src/tasks/` owns task domain and persistence.
+- `migrations/` owns schema evolution.
 - Tests are placed where they match component ownership.
 
 ### Requirements Coverage Validation
@@ -1192,8 +1148,8 @@ Phase 2 mobile/sync is not implemented in Phase 1, but the data model supports l
 All FR groups are supported:
 
 - FR1-FR8: task model, repository, DTOs, UI task rendering.
-- FR9-FR16: Tauri tray/window modules and tray panel UI.
-- FR17-FR21: full edit window and shared task command/store boundary.
+- FR9-FR16: Rust tray/window modules and tray panel UI.
+- FR17-FR21: full edit window and shared Rust service/state boundary.
 - FR22-FR26: SQLite, SQLx repository, migrations, restart persistence.
 - FR27-FR41: deferred to Phase 2 with sync-ready model support.
 - FR42-FR45: tray menu/control, app lifecycle, status UI.
@@ -1205,7 +1161,7 @@ NFRs are architecturally addressed:
 - Reliability: Rust-side repository, migrations, transaction-oriented writes.
 - Data safety: soft delete, source-of-truth SQLite, command success before UI mutation.
 - Security/privacy: no account, cloud, telemetry, or external transfer in Phase 1.
-- Linux compatibility: Tauri tray validation is first implementation priority.
+- Linux compatibility: Rust native tray validation is first implementation priority.
 - Maintainability: explicit module boundaries and consistency rules.
 
 ### Implementation Readiness Validation
@@ -1213,11 +1169,13 @@ NFRs are architecturally addressed:
 **Decision Completeness:**
 Critical decisions are documented:
 
-- Tauri v2 shell.
-- Official Tauri Vanilla TypeScript starter.
+- Rust-native desktop shell.
+- Slint complete lightweight Rust UI module.
+- Lightweight Rust tray integration.
 - SQLx + SQLite persistence.
-- Tauri command boundary.
+- Rust service/controller boundary.
 - No Node ORM/sidecar.
+- No Tauri, WebGTK/WebKit, webview, Vite, pnpm app workflow, or browser-based UI runtime.
 - No backend/cloud/account in Phase 1.
 - Phase 2 sync deferred.
 
@@ -1234,7 +1192,6 @@ None.
 
 **Important Gaps:**
 
-- The exact MVP Linux validation baseline must still be named before implementation stories begin. Examples: KDE Plasma tray, GNOME with AppIndicator extension, or another concrete desktop environment.
 - Test runner choice for TypeScript is deferred until the frontend scaffold exists.
 
 **Nice-to-Have Gaps:**
@@ -1289,18 +1246,16 @@ The main risk identified in PRD validation was NFR specificity around Linux tray
 
 - Clear Phase 1 scope boundary.
 - First implementation priority targets the highest technical risk.
-- Persistence architecture fits Tauri instead of forcing Node ORM assumptions.
+- Persistence architecture fits a Rust-native app instead of forcing Node ORM assumptions.
 - Data model is sync-ready without implementing sync early.
 - Project structure gives agents concrete ownership boundaries.
 - Patterns prevent common multi-agent conflicts.
 
 **Areas for Future Enhancement:**
 
-- Name and document the concrete Linux tray validation baseline.
-- Add TypeScript test runner after scaffold.
 - Define packaging once local MVP behavior is validated.
 - Define sync protocol in Phase 2 architecture.
-- Revisit frontend framework only if Vanilla TypeScript becomes limiting.
+- Revisit UI toolkit only if Slint becomes limiting.
 
 ### Implementation Handoff
 
@@ -1310,17 +1265,16 @@ The main risk identified in PRD validation was NFR specificity around Linux tray
 - Use implementation patterns consistently across all components.
 - Respect project structure and boundaries.
 - Refer to this document for all architectural questions.
-- Do not introduce backend, cloud, account, sync, Prisma, Drizzle, Kysely, or Node ORM runtime in Phase 1.
+- Do not introduce Tauri, WebGTK/WebKit, webview UI, backend, cloud, account, sync, Prisma, Drizzle, Kysely, or Node ORM runtime in Phase 1.
 - Prove tray lifecycle before persistence and UI polish.
 
 **First Implementation Priority:**
 
-Scaffold the official Tauri Vanilla TypeScript app, then prove Linux tray behavior on the chosen MVP Linux validation baseline:
+Scaffold the Rust-native Slint app, then prove Linux tray behavior on the chosen MVP Linux validation baseline:
 
 ```bash
-pnpm create tauri-app taskbar-todolist-desktop
-pnpm install
-pnpm tauri dev
+cargo init taskbar-todolist-desktop --bin
+cargo run
 ```
 
 The first implementation story should validate:

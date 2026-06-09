@@ -36,7 +36,7 @@ Story and epic numbers are stable traceability identifiers. The implementation o
 4. Epic 4: Full Task Editing UI.
 5. Epic 5: Mobile Companion and Local Sync.
 
-This sequence prevents Epic 2 from creating temporary task behavior before the SQLite model, Tauri command boundary, and task repository exist. Sprint planning must follow this implementation sequence rather than numeric epic order.
+This sequence prevents Epic 2 from creating temporary task behavior before the SQLite model, Rust service/controller boundary, and task repository exist. Sprint planning must follow this implementation sequence rather than numeric epic order.
 
 ## Requirements Inventory
 
@@ -104,8 +104,8 @@ NFR11: Le MVP ne doit pas necessiter de compte utilisateur.
 NFR12: Le MVP ne doit pas envoyer de donnees vers un cloud par defaut.
 NFR13: Les donnees de taches doivent rester stockees localement sauf action explicite de synchronisation.
 NFR14: Toute synchronisation doit etre declenchee ou acceptee explicitement dans le MVP.
-NFR15: L'app desktop doit fonctionner sur l'environnement Linux cible du MVP avec Tauri, valide par lancement de l'app, presence de l'icone tray, ouverture du panneau, ajout, suppression, modification et persistance locale.
-NFR16: Avant d'implementer mobile ou sync, un prototype Tauri doit demontrer sur Linux l'affichage de l'icone tray, l'ouverture du petit panneau, l'input en haut, l'ajout par `Entree`, la poubelle par tache, et la fermeture du panneau sans quitter le processus.
+NFR15: L'app desktop doit fonctionner sur l'environnement Linux cible du MVP avec une stack Rust native, valide par lancement de l'app, presence de l'icone tray, ouverture du panneau, ajout, suppression, modification et persistance locale.
+NFR16: Avant d'implementer mobile ou sync, un prototype Rust natif sans Tauri/WebGTK/WebKit doit demontrer sur Linux l'affichage de l'icone tray, l'ouverture du petit panneau, l'input en haut, l'ajout par `Entree`, la poubelle par tache, et la fermeture du panneau sans quitter le processus.
 NFR17: Le MVP doit prioriser au moins un environnement Linux desktop compatible system tray ou AppIndicator, documente comme environnement de validation principal avant tout support multi-environnement.
 NFR18: Le support Windows/macOS est hors exigence MVP.
 NFR19: Depuis le tray, l'utilisateur doit pouvoir consulter la liste apres un clic sur l'icone, ajouter via l'input du haut + `Entree`, et supprimer via la poubelle a droite de chaque tache.
@@ -118,27 +118,29 @@ NFR25: Le modele de tache de Phase 1 doit deja inclure les champs requis pour la
 
 ### Additional Requirements
 
-- Use the official Tauri Vanilla TypeScript starter as the first implementation foundation.
-- Use Tauri v2 as the desktop shell.
-- Use Vanilla TypeScript frontend modules in Phase 1; do not introduce React, Vue, or Svelte unless Vanilla TypeScript becomes limiting later.
-- Use Tailwind CSS v4 after the base Tauri startup is proven.
+- Use a Rust-native desktop application as the first implementation foundation.
+- Do not use Tauri, WebGTK/WebKit, webviews, Vite, pnpm, or a browser-based UI runtime for the app UI.
+- Use Slint as the complete but lightweight Rust UI module in Phase 1.
+- Use a lightweight Rust tray integration such as `tray-icon` for Linux system tray behavior.
 - Use Rust-side SQLite persistence with SQLx.
+- Use Debian GNU/Linux 13 (trixie), GNOME X11, with GNOME AppIndicator/KStatusNotifierItem extension as the primary developer and MVP tray validation stack.
+- Prefer Debian/Ubuntu native package names and commands when documenting Linux prerequisites.
 - Do not use Prisma, Drizzle, Kysely, MikroORM, TypeORM, or a Node sidecar in Phase 1.
-- Expose task persistence through Tauri commands only.
+- Expose task persistence through Rust service/controller functions only.
 - Validate Linux tray/AppIndicator behavior before implementing full persistence, mobile, or sync.
 - Keep Phase 1 offline-only, backend-free, cloud-free, account-free, and sync-free.
 - Use a sync-ready task model from Phase 1: stable ID, text, status, created/updated timestamps, and deletion marker.
 - Use soft-delete/tombstone semantics internally through `deleted_at`; active task lists must filter deleted tasks.
 - Run SQLx migrations at app startup before task commands become available.
-- Keep SQLite access inside `src-tauri`.
-- Keep frontend task operations behind `src/state/task-commands.ts`; UI modules must not call raw `invoke(...)` everywhere.
-- Keep tray panel and full edit UI backed by the same task command/store boundary.
-- Use ISO 8601 UTC strings across Rust, TypeScript, and SQLite text columns.
-- Use snake_case for database/Rust command names and camelCase for TypeScript UI fields.
-- Any schema change must include a migration and update Rust/TypeScript task types.
+- Keep SQLite access inside Rust task repository modules.
+- Keep UI task operations behind Rust service/controller modules; UI adapters must not access SQLite directly.
+- Keep tray panel and full edit UI backed by the same Rust service/state boundary.
+- Use ISO 8601 UTC strings across Rust and SQLite text columns.
+- Use snake_case for database/Rust names.
+- Any schema change must include a migration and update Rust task/UI adapter types.
 - Any user-facing error must map from a stable error code.
-- The first implementation priority is to scaffold Tauri and prove tray lifecycle: tray icon appears, click opens panel/window, input can autofocus, panel close does not quit process, explicit quit works.
-- Name and document one concrete Linux tray validation baseline before implementation stories begin.
+- The first implementation priority is to scaffold the Rust native app and prove tray lifecycle: tray icon appears, click/menu opens panel/window, input can autofocus, panel close does not quit process, explicit quit works.
+- Keep the concrete Linux tray validation baseline documented as Debian GNU/Linux 13 (trixie), GNOME X11, with GNOME AppIndicator/KStatusNotifierItem extension.
 
 ### UX Design Requirements
 
@@ -231,7 +233,7 @@ Story 2.2: FR1, FR11, FR12, NFR2, NFR19, UX-DR3, UX-DR4, UX-DR5, UX-DR6, UX-DR7.
 Story 2.3: FR2, FR13, UX-DR8, UX-DR10, UX-DR20, UX-DR26, UX-DR30.
 Story 2.4: FR3, FR14, NFR3, NFR20, UX-DR9, UX-DR11, UX-DR12, UX-DR13, UX-DR24, UX-DR25.
 Story 3.1: FR6, FR7, FR8, FR22, FR26, NFR8, NFR23, NFR24, NFR25, architecture SQLx/SQLite requirements.
-Story 3.2: FR1, FR2, FR3, FR4, FR5, FR22, FR24, architecture Tauri command and error-boundary requirements.
+Story 3.2: FR1, FR2, FR3, FR4, FR5, FR22, FR24, architecture Rust service/controller and error-boundary requirements.
 Story 3.3: FR22, FR23, FR24, NFR4, NFR6, NFR10.
 Story 3.4: FR6, FR25, FR26, NFR5, NFR7, NFR8, architecture soft-delete and data-safety requirements.
 Story 4.1: FR15, FR17, FR21, NFR20, UX-DR28.
@@ -278,23 +280,24 @@ Users can use a mobile companion, store tasks locally on mobile, and synchronize
 
 Users can launch Taskbar Todolist as a Linux desktop app, see it in the tray, open a compact panel, and keep the app running in the background.
 
-### Story 1.1: Scaffold Tauri App and Linux Validation Baseline
+### Story 1.1: Scaffold Rust Native App and Linux Validation Baseline
 
 As a desktop user,
-I want the app scaffolded with the selected Tauri starter and a named Linux validation baseline,
+I want the app scaffolded with the selected Rust-native Slint stack and a named Linux validation baseline,
 So that implementation starts from the agreed architecture and proves the target environment first.
 
 **Acceptance Criteria:**
 
 **Given** the repository is ready for implementation
 **When** the app is scaffolded
-**Then** it uses the official Tauri Vanilla TypeScript starter
-**And** the project can run through the Tauri development command.
+**Then** it uses a Rust-native Cargo application with Slint UI
+**And** it does not include Tauri, WebGTK/WebKit, Vite, pnpm, or a webview UI runtime
+**And** the project can run through the Rust development command.
 
 **Given** the starter has been scaffolded
 **When** dependencies are installed
 **Then** dependency installation completes successfully
-**And** the repository documents the local development command needed to run the Tauri app.
+**And** the repository documents the local development command needed to run the Rust native app.
 
 **Given** the architecture requires a Linux tray validation baseline
 **When** the scaffold story is completed
@@ -355,7 +358,7 @@ So that I can understand and control the app lifecycle.
 
 Users can add tasks from the tray panel with the top input, see active tasks immediately, and delete tasks from the row-level trash action without opening the full UI.
 
-**Implementation order:** Run this epic after Epic 3. Task creation, listing, and deletion must use the shared `task-commands.ts` -> Tauri command -> Rust repository -> SQLite boundary introduced in Epic 3, not temporary frontend-only state.
+**Implementation order:** Run this epic after Epic 3. Task creation, listing, and deletion must use the shared Slint UI binding -> Rust task service -> Rust repository -> SQLite boundary introduced in Epic 3, not temporary UI-only state.
 
 ### Story 2.1: Compact Native Tray Panel UI
 
@@ -402,10 +405,10 @@ So that I can capture a task without breaking my workflow.
 **Then** a new simple task is created
 **And** the task appears in the active task list.
 
-**Given** the task command boundary from Epic 3 is available
+**Given** the Rust task service boundary from Epic 3 is available
 **When** the user adds a task from the tray
-**Then** the UI creates the task through `task-commands.ts`
-**And** it does not create a frontend-only task record that bypasses persistence.
+**Then** the UI creates the task through the Rust task service
+**And** it does not create a UI-only task record that bypasses persistence.
 
 **Given** a task is added successfully
 **When** the add operation completes
@@ -435,7 +438,7 @@ So that I can quickly review what is currently pending.
 
 **Given** active tasks are rendered
 **When** the tray panel loads task data
-**Then** it reads active tasks through the shared task store backed by Tauri commands.
+**Then** it reads active tasks through the shared Rust service/state boundary.
 
 **Given** a task row is rendered
 **When** the task text is long
@@ -506,8 +509,8 @@ So that my tasks survive app restarts without any cloud dependency.
 
 **Given** the architecture requires Rust-side persistence
 **When** the schema and database access are implemented
-**Then** SQLite access exists only under `src-tauri`
-**And** no frontend TypeScript module accesses SQLite directly.
+**Then** SQLite access exists only under Rust task repository modules
+**And** no UI module accesses SQLite directly.
 
 **Given** Phase 1 excludes Node ORMs
 **When** dependencies are inspected
@@ -517,7 +520,7 @@ So that my tasks survive app restarts without any cloud dependency.
 **When** a command-level or repository-level smoke test creates a task record
 **Then** the task can be read back from SQLite with its stable ID, text, status, timestamps, and nullable `deleted_at` fields intact.
 
-### Story 3.2: Rust Task Repository and Tauri Commands
+### Story 3.2: Rust Task Repository and Services
 
 As a desktop user,
 I want task operations to be saved through the native app layer,
@@ -529,12 +532,12 @@ So that task behavior is reliable and consistent across tray and full UI.
 **When** the task repository is implemented
 **Then** it supports create, list active, update, and soft delete operations.
 
-**Given** Tauri commands are registered
-**When** the frontend invokes task operations
-**Then** `create_task`, `list_tasks`, `update_task`, and `delete_task` are available.
+**Given** Rust task services are registered or wired into app state
+**When** the UI invokes task operations
+**Then** `create_task`, `list_tasks`, `update_task`, and `delete_task` are available through the Rust service/controller boundary.
 
-**Given** command DTOs cross the Rust/TypeScript boundary
-**When** task data is returned to the frontend
+**Given** task view data crosses the service/UI boundary
+**When** task data is returned to the UI
 **Then** TypeScript receives camelCase fields
 **And** Rust/database internals remain snake_case.
 
@@ -636,7 +639,7 @@ So that I can clarify tasks after quick capture.
 
 **Given** a task is selected
 **When** the user edits the text and saves
-**Then** the task text is updated through the shared Tauri command boundary.
+**Then** the task text is updated through the shared Rust service boundary.
 
 **Given** the edit command succeeds
 **When** the tray panel next renders

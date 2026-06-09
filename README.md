@@ -1,71 +1,43 @@
 # Taskbar Todolist Desktop
 
-Linux-first desktop app for a tray-first local todolist. Phase 1 is desktop-local only: no backend, no cloud service, no account provider, no mobile framework, and no sync runtime.
+Linux-first Rust native desktop app for quick task capture from the system tray.
 
 ## Stack
 
-- Tauri v2 desktop shell.
-- Vanilla TypeScript frontend generated from the official Tauri starter.
-- pnpm for JavaScript dependencies.
-- Rust for the Tauri application shell.
+- Rust native application shell
+- Slint for the complete lightweight UI module
+- Optional lightweight Rust tray integration through the `tray` feature
+- SQLite persistence through SQLx
+- Debian GNU/Linux 13 (trixie), GNOME X11, GNOME AppIndicator/KStatusNotifierItem extension as the MVP validation baseline
 
-Do not add React, Vue, Svelte, Tailwind, backend/cloud/sync dependencies, mobile runtime dependencies, Prisma, Drizzle, Kysely, MikroORM, TypeORM, or a Node ORM sidecar during Phase 1 scaffold work.
+The app intentionally does not use Tauri, WebGTK/WebKit, webviews, Vite, pnpm, or a browser-based UI runtime.
 
-## Local Development
+## Development
 
-Install JavaScript dependencies:
-
-```sh
-pnpm install
+```bash
+cargo run
 ```
 
-Run the Tauri app in development:
+Tray integration is prepared as an optional feature so the base scaffold stays light and does not require GTK/GDK packages before tray validation:
 
-```sh
-pnpm tauri dev
+```bash
+cargo run --features tray
 ```
 
-On Linux, tray icon click behavior depends on the desktop environment. The
-validated fallback path for the tray lifecycle is the tray menu item
-`Open Taskbar Todolist`, which opens the compact panel through Rust/Tauri.
-The panel UI itself is Vanilla TypeScript and uses Lucide icons only for
-in-panel visual controls.
+Native Linux packages expected for the validation baseline:
 
-The frontend-only Vite command is available for quick UI checks:
-
-```sh
-pnpm dev
+```bash
+sudo apt install build-essential pkg-config libssl-dev libdbus-1-dev libayatana-appindicator3-dev librsvg2-dev
 ```
 
-## Linux Validation Baseline
+When validating the optional tray feature, install the additional GTK/GDK development package required by `tray-icon` on Debian-family systems:
 
-MVP tray/AppIndicator validation target:
-
-- Distribution: Debian GNU/Linux 13 (trixie).
-- Desktop environment: GNOME.
-- Session type: X11.
-- Tray/AppIndicator support: GNOME AppIndicator/KStatusNotifierItem extension must be enabled for tray validation.
-- Manual validation command: `pnpm tauri dev`.
-- Expected scaffold outcome: Vite starts on `http://localhost:1420/`, then Cargo starts the Tauri desktop process.
-
-Required Debian/Ubuntu-family system packages for Tauri v2 desktop development:
-
-```sh
-sudo apt install \
-  build-essential \
-  curl \
-  file \
-  libdbus-1-dev \
-  libayatana-appindicator3-dev \
-  librsvg2-dev \
-  libssl-dev \
-  libwebkit2gtk-4.1-dev \
-  libxdo-dev \
-  pkg-config
+```bash
+sudo apt install libgtk-3-dev
 ```
 
-Current local validation note: rustup is installed for the user and the project
-now validates with `rustc 1.95.0` / `cargo 1.95.0`. `pnpm tauri dev`
-starts Vite and reaches native compilation. The current actionable system
-blocker is missing `dbus-1.pc`; install `libdbus-1-dev` and `pkg-config` on
-Debian/Ubuntu-family systems before continuing native tray validation.
+## Validation Baseline
+
+- Distribution: Debian GNU/Linux 13 (trixie)
+- Desktop/session: GNOME X11
+- Tray support: GNOME AppIndicator/KStatusNotifierItem extension

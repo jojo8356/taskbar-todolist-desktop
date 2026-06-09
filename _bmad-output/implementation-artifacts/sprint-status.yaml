@@ -36,15 +36,15 @@
 # - This file follows the corrected implementation sequence from epics.md: Epic 1 -> Epic 3 -> Epic 2 -> Epic 4 -> Epic 5.
 
 generated: "2026-05-19T14:38:52+02:00"
-last_updated: "2026-05-22T11:22:00+02:00"
+last_updated: "2026-06-09T14:30:00+02:00"
 project: taskbar-todolist-desktop
 project_key: NOKEY
 tracking_system: file-system
 story_location: /home/pj509414/Documents/projets perso/taskbar-todolist-desktop/_bmad-output/implementation-artifacts
 
 development_status:
-  epic-1: done
-  1-1-scaffold-tauri-app-and-linux-validation-baseline: done
+  epic-1: in-progress
+  1-1-scaffold-rust-native-app-and-linux-validation-baseline: done
   1-2-tray-icon-opens-compact-panel-without-quitting-app: done
   1-3-app-tray-controls-and-explicit-quit: done
   epic-1-retrospective: optional
