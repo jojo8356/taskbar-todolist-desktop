@@ -1,4 +1,5 @@
 use crate::app::AppState;
+use slint::{CloseRequestResponse, ComponentHandle};
 
 slint::slint! {
     export component MainWindow inherits Window {
@@ -32,6 +33,10 @@ slint::slint! {
 pub fn create_main_window(app_state: &AppState) -> Result<MainWindow, slint::PlatformError> {
     let window = MainWindow::new()?;
     let tasks = app_state.tasks.clone();
+
+    window
+        .window()
+        .on_close_requested(|| CloseRequestResponse::HideWindow);
 
     window.on_add_task(move |text| {
         let _ = tasks.create_task(text.to_string());
