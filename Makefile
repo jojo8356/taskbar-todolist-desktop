@@ -4,14 +4,14 @@ VERSION := $(shell sed -n 's/^version = "\(.*\)"/\1/p' Cargo.toml | head -n 1)
 PREFIX ?= $(HOME)/.local
 BINDIR := $(PREFIX)/bin
 DATADIR := $(PREFIX)/share
-APPDIR := $(DATADIR)/applications
+APPLICATIONS_DIR := $(DATADIR)/applications
 LIBEXECDIR := $(DATADIR)/$(APP_NAME)
-DESKTOP_FILE := $(APPDIR)/$(APP_NAME).desktop
+DESKTOP_FILE := $(APPLICATIONS_DIR)/$(APP_NAME).desktop
 LAUNCHER := $(BINDIR)/$(APP_NAME)
 INSTALLED_BINARY := $(LIBEXECDIR)/$(APP_NAME)
 DISTDIR := dist
 APPDIR_ROOT := $(DISTDIR)/appimage
-APPDIR := $(APPDIR_ROOT)/$(APP_NAME).AppDir
+APPIMAGE_DIR := $(APPDIR_ROOT)/$(APP_NAME).AppDir
 DEB_ROOT := $(DISTDIR)/deb/$(APP_NAME)_$(VERSION)_amd64
 DEB_FILE := $(DISTDIR)/$(APP_NAME)_$(VERSION)_amd64.deb
 APPIMAGE_FILE := $(DISTDIR)/$(APP_NAME)-$(VERSION)-x86_64.AppImage
@@ -23,7 +23,7 @@ build:
 	cargo build --release
 
 install: build
-	install -d "$(BINDIR)" "$(LIBEXECDIR)" "$(APPDIR)"
+	install -d "$(BINDIR)" "$(LIBEXECDIR)" "$(APPLICATIONS_DIR)"
 	install -m 755 "target/release/$(APP_NAME)" "$(INSTALLED_BINARY)"
 	printf '%s\n' '#!/usr/bin/env sh' \
 		'set -eu' \
@@ -48,7 +48,7 @@ install: build
 
 desktop-refresh:
 	@if command -v update-desktop-database >/dev/null 2>&1; then \
-		update-desktop-database "$(APPDIR)" >/dev/null 2>&1 || true; \
+		update-desktop-database "$(APPLICATIONS_DIR)" >/dev/null 2>&1 || true; \
 	fi
 
 uninstall:
@@ -89,11 +89,11 @@ package-deb: build
 
 package-appimage: build
 	rm -rf "$(APPDIR_ROOT)"
-	install -d "$(APPDIR)/usr/bin" "$(APPDIR)/usr/share/$(APP_NAME)" "$(APPDIR)/usr/share/applications" "$(APPDIR)/usr/share/icons/hicolor/scalable/apps"
-	install -m 755 "target/release/$(APP_NAME)" "$(APPDIR)/usr/share/$(APP_NAME)/$(APP_NAME)"
-	install -m 755 "packaging/AppRun" "$(APPDIR)/AppRun"
-	install -m 644 "packaging/$(APP_NAME).svg" "$(APPDIR)/$(APP_NAME).svg"
-	install -m 644 "packaging/$(APP_NAME).svg" "$(APPDIR)/usr/share/icons/hicolor/scalable/apps/$(APP_NAME).svg"
-	sed 's|@EXEC@|AppRun|g; s|@ICON@|$(APP_NAME)|g' "packaging/$(APP_NAME).desktop.in" > "$(APPDIR)/$(APP_NAME).desktop"
-	sed 's|@EXEC@|$(APP_NAME)|g; s|@ICON@|$(APP_NAME)|g' "packaging/$(APP_NAME).desktop.in" > "$(APPDIR)/usr/share/applications/$(APP_NAME).desktop"
-	$(APPIMAGETOOL) "$(APPDIR)" "$(APPIMAGE_FILE)"
+	install -d "$(APPIMAGE_DIR)/usr/bin" "$(APPIMAGE_DIR)/usr/share/$(APP_NAME)" "$(APPIMAGE_DIR)/usr/share/applications" "$(APPIMAGE_DIR)/usr/share/icons/hicolor/scalable/apps"
+	install -m 755 "target/release/$(APP_NAME)" "$(APPIMAGE_DIR)/usr/share/$(APP_NAME)/$(APP_NAME)"
+	install -m 755 "packaging/AppRun" "$(APPIMAGE_DIR)/AppRun"
+	install -m 644 "packaging/$(APP_NAME).svg" "$(APPIMAGE_DIR)/$(APP_NAME).svg"
+	install -m 644 "packaging/$(APP_NAME).svg" "$(APPIMAGE_DIR)/usr/share/icons/hicolor/scalable/apps/$(APP_NAME).svg"
+	sed 's|@EXEC@|AppRun|g; s|@ICON@|$(APP_NAME)|g' "packaging/$(APP_NAME).desktop.in" > "$(APPIMAGE_DIR)/$(APP_NAME).desktop"
+	sed 's|@EXEC@|$(APP_NAME)|g; s|@ICON@|$(APP_NAME)|g' "packaging/$(APP_NAME).desktop.in" > "$(APPIMAGE_DIR)/usr/share/applications/$(APP_NAME).desktop"
+	$(APPIMAGETOOL) "$(APPIMAGE_DIR)" "$(APPIMAGE_FILE)"
