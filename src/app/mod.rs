@@ -1,6 +1,8 @@
 pub mod errors;
 pub mod lifecycle;
+pub mod notifications;
 pub mod state;
+pub mod tracing;
 pub mod tray;
 pub mod windows;
 

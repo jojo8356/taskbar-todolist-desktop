@@ -12,7 +12,9 @@ dist
 dist-ssr
 build
 target
+taskbar-todolist.sqlite
 vendor/dbus-1-dev/
+gtk-legacy-tray/
 *.local
 .env
 .env.*

@@ -4,7 +4,12 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-slint = "1"
+chrono = { version = "0.4", default-features = false, features = ["clock"] }
+gtk = "0.18"
+lucide-icons = "1.24"
+slint = { version = "1", features = ["unstable-fontique-08"] }
 sqlx = { version = "0.8", default-features = false, features = ["runtime-tokio", "sqlite", "migrate", "macros"] }
 tokio = { version = "1", features = ["rt-multi-thread"] }
-zbus = "5"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "fmt"] }
+uuid = { version = "1", features = ["v4"] }

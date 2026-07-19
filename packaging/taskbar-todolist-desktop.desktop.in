@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Taskbar Todolist
+Comment=Todo list compacte dans la zone de notification
+Exec=@EXEC@
+Icon=@ICON@
+Terminal=false
+Categories=Utility;
+StartupNotify=false

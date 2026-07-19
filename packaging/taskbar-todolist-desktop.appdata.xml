@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>io.github.taskbar_todolist.taskbar_todolist_desktop</id>
+  <metadata_license>MIT</metadata_license>
+  <project_license>MIT</project_license>
+  <name>Taskbar Todolist</name>
+  <developer_name>taskbar-todolist</developer_name>
+  <summary>Compact tray todo list for Linux desktops</summary>
+  <description>
+    <p>Taskbar Todolist is a small desktop todo list available from the system tray. It keeps active tasks one click away, supports quick entry, inline editing, soft deletion, and local SQLite persistence.</p>
+  </description>
+  <launchable type="desktop-id">taskbar-todolist-desktop.desktop</launchable>
+  <url type="homepage">https://github.com/taskbar-todolist/taskbar-todolist-desktop</url>
+  <content_rating type="oars-1.1"/>
+  <releases>
+    <release version="0.1.0" date="2026-07-19"/>
+  </releases>
+</component>

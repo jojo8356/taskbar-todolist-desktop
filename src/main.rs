@@ -3,11 +3,30 @@ mod tasks;
 mod ui;
 
 use slint::ComponentHandle;
+use std::error::Error;
 
-fn main() -> Result<(), slint::PlatformError> {
-    let app_state = app::AppState::new();
+fn main() -> Result<(), Box<dyn Error>> {
+    app::tracing::init();
+    tracing::info!("starting taskbar todolist desktop");
+
+    let app_state = app::AppState::new()?;
+    let active_task_count = app_state
+        .tasks
+        .list_active_tasks()
+        .unwrap_or_default()
+        .len();
+    tracing::debug!(
+        active_task_count,
+        "active tasks loaded before window creation"
+    );
+
     let main_window = ui::create_main_window(&app_state)?;
     let _tray = app::tray::create_tray(main_window.as_weak());
 
-    main_window.run()
+    app::notifications::show_todolist_initialized(active_task_count);
+    tracing::info!("entering slint event loop");
+    slint::run_event_loop_until_quit()?;
+
+    tracing::info!("slint event loop exited");
+    Ok(())
 }
