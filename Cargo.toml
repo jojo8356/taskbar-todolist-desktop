@@ -7,6 +7,8 @@ edition = "2024"
 chrono = { version = "0.4", default-features = false, features = ["clock"] }
 gtk = "0.18"
 lucide-icons = "1.24"
+serde = { version = "1", features = ["derive"] }
+serde_yaml = "0.9"
 slint = { version = "1", features = ["unstable-fontique-08"] }
 sqlx = { version = "0.8", default-features = false, features = ["runtime-tokio", "sqlite", "migrate", "macros"] }
 tokio = { version = "1", features = ["rt-multi-thread"] }

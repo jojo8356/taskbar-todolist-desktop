@@ -34,8 +34,9 @@ After launch, look for the app icon in the desktop notification area.
 5. Double-click task text to edit it.
 6. Press `Enter` while editing to save the change.
 7. Click the trash icon to delete a task.
-8. Click `Hide`, or click the tray icon again, to hide the popup.
-9. Click `Quit` or use the tray menu to close the app.
+8. Click the settings icon to open language and popup-height options.
+9. Click `Hide`, or click the tray icon again, to hide the popup.
+10. Click `Quit` or use the tray menu to close the app.
 
 Completed tasks are automatically moved to the bottom of the list.
 
@@ -69,6 +70,48 @@ ${XDG_DATA_HOME:-$HOME/.local/share}/taskbar-todolist-desktop/
 
 Development launches from `cargo run` store `taskbar-todolist.sqlite` in the
 current project directory.
+
+## Settings
+
+The app creates and maintains this YAML file automatically:
+
+```text
+taskbar-todolist.settings.yaml
+```
+
+Installed/package launches store it next to the SQLite database:
+
+```text
+${XDG_DATA_HOME:-$HOME/.local/share}/taskbar-todolist-desktop/taskbar-todolist.settings.yaml
+```
+
+Default content:
+
+```yaml
+language: fr
+visible_tasks: 3
+```
+
+Supported values:
+
+- `language`: `fr` or `en`
+- `visible_tasks`: number of task rows shown before scrolling
+
+The maximum `visible_tasks` value is computed when the tray starts:
+
+```text
+screen height / 42px task-row pitch
+```
+
+For example, a 1080px-high screen allows up to 25 visible task rows. If the
+screen height cannot be detected yet, the app temporarily falls back to `20`.
+
+In the settings panel, `visible_tasks` is typed directly and validated with
+`Enter`. If the input is not a complete integer, or if it exceeds the current
+runtime limit, the field returns to a normalized valid value.
+
+If the file is missing, invalid, or outside supported bounds, the app rewrites it
+with normalized values on startup.
 
 ## Backup
 
@@ -174,6 +217,18 @@ Package build:
 make clean-dist package
 ```
 
+Rust web documentation:
+
+```bash
+make docs
+```
+
+The generated entry point is:
+
+```text
+target/doc/taskbar_todolist_desktop/index.html
+```
+
 ## Logs
 
 Enable trace logging:
@@ -209,4 +264,3 @@ Published release:
 ```text
 https://github.com/taskbar-todolist/taskbar-todolist-desktop/releases/tag/v0.1.0
 ```
-

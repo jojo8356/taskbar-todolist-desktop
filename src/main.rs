@@ -1,3 +1,9 @@
+//! Entrypoint for the Linux tray todo app.
+//!
+//! Startup intentionally creates the Slint window before the GTK tray: the tray
+//! owns the user's open/hide action, while the window starts hidden in the
+//! background and is positioned only after a tray click.
+
 mod app;
 mod tasks;
 mod ui;

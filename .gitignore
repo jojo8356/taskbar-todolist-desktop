@@ -13,6 +13,7 @@ dist-ssr
 build
 target
 taskbar-todolist.sqlite
+taskbar-todolist.settings.yaml
 vendor/dbus-1-dev/
 gtk-legacy-tray/
 *.local

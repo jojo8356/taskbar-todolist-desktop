@@ -1,3 +1,10 @@
+//! GTK tray integration and popup positioning.
+//!
+//! The app uses `GtkStatusIcon` because it behaves predictably in MATE-style
+//! notification areas. Click handling prefers GTK's icon geometry over raw
+//! pointer coordinates, which keeps the popup anchored below the same icon even
+//! when the user clicks slightly left or right inside it.
+
 use std::error::Error;
 use std::ffi::CString;
 use std::fmt;
@@ -12,8 +19,9 @@ use gtk::glib::translate::{IntoGlib, from_glib};
 use gtk::prelude::*;
 use slint::{ComponentHandle, PhysicalPosition, Weak};
 
+use crate::app::settings::intelligent_visible_task_limit;
 use crate::app::windows;
-use crate::ui::MainWindow;
+use crate::ui::{MainWindow, apply_visible_task_limit};
 
 const TRAY_ICON_NAME: &str = "task-due";
 const TRAY_TOOLTIP: &str = "Taskbar Todolist";
@@ -24,6 +32,7 @@ pub struct AppTray {
     _thread: thread::JoinHandle<()>,
 }
 
+/// Starts the GTK tray thread and returns a guard that keeps it alive.
 pub fn create_tray(window: Weak<MainWindow>) -> Option<AppTray> {
     tracing::trace!("create_tray");
     match create_app_tray(window) {
@@ -59,6 +68,7 @@ fn create_app_tray(window: Weak<MainWindow>) -> Result<AppTray, TrayError> {
 fn run_gtk_tray(window: Weak<MainWindow>) -> Result<(), TrayError> {
     tracing::trace!("run_gtk_tray");
     let gtk = GtkInitialized::initialize()?;
+    apply_visible_task_limit(window.clone(), runtime_visible_task_limit());
     let menu = build_tray_menu(&gtk, window.clone());
     let tray = LegacyStatusIcon::new(TRAY_ICON_NAME, TRAY_TOOLTIP, menu, window)?;
 
@@ -284,6 +294,7 @@ where
 }
 
 fn run_gtk_loop() {
+    // GTK runs on its own thread while Slint owns the main event loop.
     loop {
         while gtk::events_pending() {
             gtk::main_iteration_do(false);
@@ -386,6 +397,36 @@ fn popup_position_from_anchor(anchor: ScreenPoint) -> PhysicalPosition {
         (anchor.x - PANEL_WIDTH / 2).max(0),
         (anchor.y + PANEL_GAP).max(0),
     )
+}
+
+fn runtime_visible_task_limit() -> i32 {
+    let screen_height = default_screen_height();
+    let visible_task_limit = screen_height
+        .map(intelligent_visible_task_limit)
+        .unwrap_or(crate::app::settings::FALLBACK_MAX_VISIBLE_TASKS);
+    tracing::debug!(
+        screen_height,
+        visible_task_limit,
+        "computed intelligent visible task limit"
+    );
+    visible_task_limit
+}
+
+fn default_screen_height() -> Option<i32> {
+    // The default screen is only reliable after `gtk::init`.
+    let screen = unsafe { gtk::gdk::ffi::gdk_screen_get_default() };
+    if screen.is_null() {
+        tracing::warn!("gtk default screen unavailable for visible task limit");
+        return None;
+    }
+
+    let height = unsafe { gtk::gdk::ffi::gdk_screen_get_height(screen) };
+    if height > 0 {
+        Some(height)
+    } else {
+        tracing::warn!(height, "gtk default screen reported invalid height");
+        None
+    }
 }
 
 fn show_panel_at(window: Weak<MainWindow>, anchor: Option<ScreenPoint>) {
@@ -532,5 +573,10 @@ mod tests {
             }),
             ScreenPoint { x: 1743, y: 15 }
         );
+    }
+
+    #[test]
+    fn runtime_limit_uses_screen_height_divided_by_task_row_height() {
+        assert_eq!(intelligent_visible_task_limit(1080), 25);
     }
 }

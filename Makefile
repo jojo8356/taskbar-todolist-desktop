@@ -16,8 +16,10 @@ DEB_ROOT := $(DISTDIR)/deb/$(APP_NAME)_$(VERSION)_amd64
 DEB_FILE := $(DISTDIR)/$(APP_NAME)_$(VERSION)_amd64.deb
 APPIMAGE_FILE := $(DISTDIR)/$(APP_NAME)-$(VERSION)-x86_64.AppImage
 APPIMAGETOOL ?= appimagetool
+APPIMAGETOOL_FLAGS ?=
+APPSTREAM_ID := io.github.taskbar_todolist.taskbar_todolist_desktop
 
-.PHONY: build install uninstall desktop-refresh package package-deb package-appimage clean-dist
+.PHONY: build install uninstall desktop-refresh package package-deb package-appimage docs clean-dist
 
 build:
 	cargo build --release
@@ -59,14 +61,18 @@ uninstall:
 
 package: package-deb package-appimage
 
+docs:
+	cargo doc --no-deps --document-private-items
+
 clean-dist:
 	rm -rf "$(DISTDIR)"
 
 package-deb: build
 	rm -rf "$(DEB_ROOT)"
-	install -d "$(DEB_ROOT)/DEBIAN" "$(DEB_ROOT)/usr/bin" "$(DEB_ROOT)/usr/share/$(APP_NAME)" "$(DEB_ROOT)/usr/share/applications" "$(DEB_ROOT)/usr/share/icons/hicolor/scalable/apps"
+	install -d "$(DEB_ROOT)/DEBIAN" "$(DEB_ROOT)/usr/bin" "$(DEB_ROOT)/usr/share/$(APP_NAME)" "$(DEB_ROOT)/usr/share/applications" "$(DEB_ROOT)/usr/share/icons/hicolor/scalable/apps" "$(DEB_ROOT)/usr/share/metainfo"
 	install -m 755 "target/release/$(APP_NAME)" "$(DEB_ROOT)/usr/share/$(APP_NAME)/$(APP_NAME)"
 	install -m 644 "packaging/$(APP_NAME).svg" "$(DEB_ROOT)/usr/share/icons/hicolor/scalable/apps/$(APP_NAME).svg"
+	install -m 644 "packaging/$(APP_NAME).appdata.xml" "$(DEB_ROOT)/usr/share/metainfo/$(APPSTREAM_ID).metainfo.xml"
 	sed 's|@EXEC@|/usr/bin/$(APP_NAME)|g; s|@ICON@|$(APP_NAME)|g' "packaging/$(APP_NAME).desktop.in" > "$(DEB_ROOT)/usr/share/applications/$(APP_NAME).desktop"
 	printf '%s\n' '#!/usr/bin/env sh' \
 		'set -eu' \
@@ -89,11 +95,12 @@ package-deb: build
 
 package-appimage: build
 	rm -rf "$(APPDIR_ROOT)"
-	install -d "$(APPIMAGE_DIR)/usr/bin" "$(APPIMAGE_DIR)/usr/share/$(APP_NAME)" "$(APPIMAGE_DIR)/usr/share/applications" "$(APPIMAGE_DIR)/usr/share/icons/hicolor/scalable/apps"
+	install -d "$(APPIMAGE_DIR)/usr/bin" "$(APPIMAGE_DIR)/usr/share/$(APP_NAME)" "$(APPIMAGE_DIR)/usr/share/applications" "$(APPIMAGE_DIR)/usr/share/icons/hicolor/scalable/apps" "$(APPIMAGE_DIR)/usr/share/metainfo"
 	install -m 755 "target/release/$(APP_NAME)" "$(APPIMAGE_DIR)/usr/share/$(APP_NAME)/$(APP_NAME)"
 	install -m 755 "packaging/AppRun" "$(APPIMAGE_DIR)/AppRun"
 	install -m 644 "packaging/$(APP_NAME).svg" "$(APPIMAGE_DIR)/$(APP_NAME).svg"
 	install -m 644 "packaging/$(APP_NAME).svg" "$(APPIMAGE_DIR)/usr/share/icons/hicolor/scalable/apps/$(APP_NAME).svg"
+	install -m 644 "packaging/$(APP_NAME).appdata.xml" "$(APPIMAGE_DIR)/usr/share/metainfo/$(APPSTREAM_ID).metainfo.xml"
 	sed 's|@EXEC@|AppRun|g; s|@ICON@|$(APP_NAME)|g' "packaging/$(APP_NAME).desktop.in" > "$(APPIMAGE_DIR)/$(APP_NAME).desktop"
 	sed 's|@EXEC@|$(APP_NAME)|g; s|@ICON@|$(APP_NAME)|g' "packaging/$(APP_NAME).desktop.in" > "$(APPIMAGE_DIR)/usr/share/applications/$(APP_NAME).desktop"
-	$(APPIMAGETOOL) "$(APPIMAGE_DIR)" "$(APPIMAGE_FILE)"
+	$(APPIMAGETOOL) $(APPIMAGETOOL_FLAGS) "$(APPIMAGE_DIR)" "$(APPIMAGE_FILE)"

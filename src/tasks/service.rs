@@ -1,3 +1,8 @@
+//! Task application service.
+//!
+//! This layer keeps UI callbacks small and centralizes logging around repository
+//! operations, while the repository remains responsible for storage details.
+
 use crate::app::errors::AppError;
 use crate::tasks::model::{Task, TaskStatus};
 use crate::tasks::repository::TaskRepository;
@@ -8,6 +13,7 @@ pub struct TaskService {
 }
 
 impl TaskService {
+    /// Opens the default SQLite-backed task repository.
     pub fn new() -> Result<Self, AppError> {
         Ok(Self {
             repository: TaskRepository::new()?,
@@ -21,6 +27,7 @@ impl TaskService {
         })
     }
 
+    /// Creates a todo task after repository-level validation.
     pub fn create_task(&self, text: String) -> Result<Task, AppError> {
         tracing::trace!(text = %text, "TaskService::create_task");
         let result = self.repository.create(text);
@@ -30,6 +37,7 @@ impl TaskService {
         result
     }
 
+    /// Lists active non-deleted tasks, with completed tasks ordered last.
     pub fn list_active_tasks(&self) -> Result<Vec<Task>, AppError> {
         tracing::trace!("TaskService::list_active_tasks");
         let result = self.repository.list_active();
@@ -40,6 +48,7 @@ impl TaskService {
         result
     }
 
+    /// Updates task text and/or status.
     pub fn update_task(
         &self,
         id: String,
@@ -62,6 +71,7 @@ impl TaskService {
         result
     }
 
+    /// Soft-deletes a task so it disappears from the active list.
     pub fn delete_task(&self, id: String) -> Result<(), AppError> {
         tracing::trace!(task_id = %id, "TaskService::delete_task");
         let result = self.repository.soft_delete(id);

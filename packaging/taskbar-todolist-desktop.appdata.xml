@@ -4,7 +4,9 @@
   <metadata_license>MIT</metadata_license>
   <project_license>MIT</project_license>
   <name>Taskbar Todolist</name>
-  <developer_name>taskbar-todolist</developer_name>
+  <developer id="io.github.taskbar_todolist">
+    <name>taskbar-todolist</name>
+  </developer>
   <summary>Compact tray todo list for Linux desktops</summary>
   <description>
     <p>Taskbar Todolist is a small desktop todo list available from the system tray. It keeps active tasks one click away, supports quick entry, inline editing, soft deletion, and local SQLite persistence.</p>

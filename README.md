@@ -18,6 +18,9 @@ productivity application.
 - Deletes a task with the trash button.
 - Persists tasks locally in SQLite.
 - Sends a startup notification, with MATE-aware wording when MATE is detected.
+- Opens a settings panel from a Lucide settings icon.
+- Saves language and visible-task-count preferences to YAML.
+- Computes the maximum visible task count from the current screen height.
 
 ## Current Platform Scope
 
@@ -126,6 +129,18 @@ Show full trace logs:
 RUST_LOG=taskbar_todolist_desktop=trace ./run_dev.sh
 ```
 
+Generate local web documentation for the Rust code:
+
+```bash
+make docs
+```
+
+Then open:
+
+```text
+target/doc/taskbar_todolist_desktop/index.html
+```
+
 ## Packaging
 
 Build release packages:
@@ -145,6 +160,9 @@ The AppImage target requires `appimagetool` in `PATH`, or an explicit path:
 APPIMAGETOOL=/path/to/appimagetool make package-appimage
 ```
 
+The `docs` target uses Rust's built-in `rustdoc` generator. No external web
+documentation generator is required for API/module documentation.
+
 ## Data Storage
 
 The app stores tasks in a local SQLite database named:
@@ -153,8 +171,14 @@ The app stores tasks in a local SQLite database named:
 taskbar-todolist.sqlite
 ```
 
+The app stores UI preferences in a YAML file named:
+
+```text
+taskbar-todolist.settings.yaml
+```
+
 When launched through the installed launcher or release package, the database is
-created under:
+and settings file are created under:
 
 ```text
 ${XDG_DATA_HOME:-$HOME/.local/share}/taskbar-todolist-desktop/
@@ -175,6 +199,27 @@ Task records contain:
 Delete actions are soft deletes: deleted tasks receive a `deleted_at` timestamp
 and are filtered out of the active list.
 
+Settings are created automatically when missing. If the YAML exists but cannot
+be parsed or does not follow the expected schema, it is rewritten with safe
+defaults.
+
+Current settings schema:
+
+```yaml
+language: fr
+visible_tasks: 3
+```
+
+Supported languages are `fr` and `en`. `visible_tasks` controls how many task
+rows are visible before scrolling and therefore changes the popup height. The
+upper bound is calculated at runtime as `screen height / 42px`, where `42px` is
+the effective task-row pitch used by the Slint list. Before GTK reports the
+screen height, the app falls back to a conservative maximum of `20`.
+
+In the settings panel, this value is typed directly by the user and saved with
+`Enter`; valid values are from `1` to the detected runtime limit. Invalid
+non-integer input is rejected and the previous valid value is restored.
+
 ## Architecture
 
 ```mermaid
@@ -191,6 +236,7 @@ Main module layout:
 
 - `src/main.rs` starts tracing, app state, UI, tray, notifications, and the Slint event loop.
 - `src/app/` owns lifecycle, app state, tray integration, notifications, tracing, and app quit behavior.
+- `src/app/settings.rs` owns YAML normalization and the intelligent visible-task limit.
 - `src/ui/` owns the Slint popup UI and UI-to-service callbacks.
 - `src/tasks/` owns task model, service, repository, and migrations.
 - `migrations/` contains SQLx SQLite migrations.
@@ -223,6 +269,7 @@ Current test coverage includes:
 - tray popup positioning and stable icon anchoring;
 - startup notification arguments and MATE wording;
 - UI model loading of active tasks.
+- settings YAML normalization and runtime visible-task limit calculations.
 
 ## Troubleshooting
 
@@ -259,4 +306,3 @@ RUST_LOG=taskbar_todolist_desktop=trace ./run_dev.sh
 
 The tray code logs click coordinates, GTK icon geometry, popup anchors, and
 show/hide decisions.
-
