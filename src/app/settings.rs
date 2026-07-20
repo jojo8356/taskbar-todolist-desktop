@@ -3,7 +3,7 @@
 //! The app keeps settings local and self-healing: missing, malformed, or
 //! out-of-range files are rewritten with normalized values. The popup height is
 //! derived from `visible_tasks`, whose runtime maximum is computed from the
-//! current screen height.
+//! available screen height after subtracting popup position, chrome, and settings panel.
 
 use crate::app::errors::{AppError, AppErrorCode};
 use serde::{Deserialize, Serialize};
@@ -17,6 +17,12 @@ pub const MIN_VISIBLE_TASKS: i32 = 1;
 pub const FALLBACK_MAX_VISIBLE_TASKS: i32 = 20;
 /// Effective row pitch in the Slint list: 34px row height plus 6px spacing.
 pub const TASK_ROW_HEIGHT_PX: i32 = 42;
+/// Fixed popup height outside the task list: top input, bottom actions, padding, and gaps.
+pub const POPUP_HEADER_FOOTER_HEIGHT_PX: i32 = 116;
+/// Extra settings panel height reserved so opening settings does not overflow the screen.
+pub const SETTINGS_PANEL_HEIGHT_PX: i32 = 94;
+/// Bottom safety gap so the popup does not touch or slip under the panel edge.
+pub const POPUP_SCREEN_BOTTOM_GAP_PX: i32 = 12;
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct AppSettings {
@@ -92,9 +98,19 @@ fn read_settings(path: &Path) -> Option<AppSettings> {
     serde_yaml::from_str::<AppSettings>(&content).ok()
 }
 
-/// Returns the maximum visible row count for the current display height.
+/// Returns the maximum visible row count when the popup starts at the top edge.
 pub fn intelligent_visible_task_limit(screen_height: i32) -> i32 {
-    (screen_height / TASK_ROW_HEIGHT_PX).max(MIN_VISIBLE_TASKS)
+    intelligent_visible_task_limit_below_popup_top(screen_height, 0)
+}
+
+/// Returns the maximum visible row count for the actual popup top position.
+pub fn intelligent_visible_task_limit_below_popup_top(screen_height: i32, popup_top: i32) -> i32 {
+    let available_height = screen_height
+        - popup_top.max(0)
+        - POPUP_SCREEN_BOTTOM_GAP_PX
+        - POPUP_HEADER_FOOTER_HEIGHT_PX
+        - SETTINGS_PANEL_HEIGHT_PX;
+    (available_height / TASK_ROW_HEIGHT_PX).max(MIN_VISIBLE_TASKS)
 }
 
 /// Clamps a user-entered row count to the active runtime limit.
@@ -165,9 +181,15 @@ mod tests {
 
     #[test]
     fn intelligent_visible_task_limit_uses_screen_height_over_row_height() {
-        assert_eq!(intelligent_visible_task_limit(1080), 25);
-        assert_eq!(intelligent_visible_task_limit(800), 19);
+        assert_eq!(intelligent_visible_task_limit(1080), 20);
+        assert_eq!(intelligent_visible_task_limit(800), 13);
         assert_eq!(intelligent_visible_task_limit(12), MIN_VISIBLE_TASKS);
+    }
+
+    #[test]
+    fn intelligent_visible_task_limit_accounts_for_popup_top_position() {
+        assert_eq!(intelligent_visible_task_limit_below_popup_top(1080, 36), 19);
+        assert_eq!(intelligent_visible_task_limit_below_popup_top(1080, 72), 18);
     }
 
     #[test]

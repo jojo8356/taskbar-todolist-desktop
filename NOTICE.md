@@ -13,14 +13,14 @@ desktop with a visible tray/status area.
 Install the Debian package:
 
 ```bash
-sudo apt install ./taskbar-todolist-desktop_0.1.0_amd64.deb
+sudo apt install ./taskbar-todolist-desktop_0.1.1_amd64.deb
 ```
 
 Or run the AppImage:
 
 ```bash
-chmod +x taskbar-todolist-desktop-0.1.0-x86_64.AppImage
-./taskbar-todolist-desktop-0.1.0-x86_64.AppImage
+chmod +x taskbar-todolist-desktop-0.1.1-x86_64.AppImage
+./taskbar-todolist-desktop-0.1.1-x86_64.AppImage
 ```
 
 After launch, look for the app icon in the desktop notification area.
@@ -100,11 +100,12 @@ Supported values:
 The maximum `visible_tasks` value is computed when the tray starts:
 
 ```text
-screen height / 42px task-row pitch
+(screen height - popup top - 12px bottom gap - 116px header/footer - 94px settings panel) / 42px task-row pitch
 ```
 
-For example, a 1080px-high screen allows up to 25 visible task rows. If the
-screen height cannot be detected yet, the app temporarily falls back to `20`.
+For example, a 1080px-high screen with the popup opening at `36px` from the top
+allows up to 19 visible task rows. If the screen height cannot be detected yet,
+the app temporarily falls back to `20`.
 
 In the settings panel, `visible_tasks` is typed directly and validated with
 `Enter`. If the input is not a complete integer, or if it exceeds the current
@@ -133,7 +134,7 @@ cp ./taskbar-todolist.backup.sqlite ~/.local/share/taskbar-todolist-desktop/task
 For a `.deb` update:
 
 ```bash
-sudo apt install ./taskbar-todolist-desktop_0.1.0_amd64.deb
+sudo apt install ./taskbar-todolist-desktop_0.1.1_amd64.deb
 ```
 
 For an AppImage update, replace the old AppImage file with the new release file,
@@ -254,13 +255,13 @@ Useful log areas:
 
 ## Release Artifacts
 
-Release v0.1.0 artifacts:
+Release v0.1.1 artifacts:
 
-- `taskbar-todolist-desktop_0.1.0_amd64.deb`
-- `taskbar-todolist-desktop-0.1.0-x86_64.AppImage`
+- `taskbar-todolist-desktop_0.1.1_amd64.deb`
+- `taskbar-todolist-desktop-0.1.1-x86_64.AppImage`
 
 Published release:
 
 ```text
-https://github.com/taskbar-todolist/taskbar-todolist-desktop/releases/tag/v0.1.0
+https://github.com/taskbar-todolist/taskbar-todolist-desktop/releases/tag/v0.1.1
 ```

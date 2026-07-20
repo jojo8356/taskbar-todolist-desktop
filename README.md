@@ -20,7 +20,7 @@ productivity application.
 - Sends a startup notification, with MATE-aware wording when MATE is detected.
 - Opens a settings panel from a Lucide settings icon.
 - Saves language and visible-task-count preferences to YAML.
-- Computes the maximum visible task count from the current screen height.
+- Computes the maximum visible task count from available screen height.
 
 ## Current Platform Scope
 
@@ -41,15 +41,15 @@ browser UI runtime, or a Node sidecar.
 
 ## Download
 
-Release v0.1.0 provides:
+Release v0.1.1 provides:
 
-- Debian package: `taskbar-todolist-desktop_0.1.0_amd64.deb`
-- AppImage: `taskbar-todolist-desktop-0.1.0-x86_64.AppImage`
+- Debian package: `taskbar-todolist-desktop_0.1.1_amd64.deb`
+- AppImage: `taskbar-todolist-desktop-0.1.1-x86_64.AppImage`
 
 Release page:
 
 ```text
-https://github.com/taskbar-todolist/taskbar-todolist-desktop/releases/tag/v0.1.0
+https://github.com/taskbar-todolist/taskbar-todolist-desktop/releases/tag/v0.1.1
 ```
 
 ## Install From Release
@@ -57,7 +57,7 @@ https://github.com/taskbar-todolist/taskbar-todolist-desktop/releases/tag/v0.1.0
 ### Debian Package
 
 ```bash
-sudo apt install ./taskbar-todolist-desktop_0.1.0_amd64.deb
+sudo apt install ./taskbar-todolist-desktop_0.1.1_amd64.deb
 ```
 
 Then launch it from the Applications menu as `Taskbar Todolist`, or run:
@@ -69,8 +69,8 @@ taskbar-todolist-desktop
 ### AppImage
 
 ```bash
-chmod +x taskbar-todolist-desktop-0.1.0-x86_64.AppImage
-./taskbar-todolist-desktop-0.1.0-x86_64.AppImage
+chmod +x taskbar-todolist-desktop-0.1.1-x86_64.AppImage
+./taskbar-todolist-desktop-0.1.1-x86_64.AppImage
 ```
 
 If the AppImage starts but no tray icon appears, check that your desktop session
@@ -212,9 +212,13 @@ visible_tasks: 3
 
 Supported languages are `fr` and `en`. `visible_tasks` controls how many task
 rows are visible before scrolling and therefore changes the popup height. The
-upper bound is calculated at runtime as `screen height / 42px`, where `42px` is
-the effective task-row pitch used by the Slint list. Before GTK reports the
-screen height, the app falls back to a conservative maximum of `20`.
+upper bound is calculated when the popup opens as
+`(screen height - popup top - 12px - 116px - 94px) / 42px`: `popup top` is the
+actual y-position below the desktop panel, `12px` is a bottom safety gap, `116px`
+is the fixed header/footer space around the list, `94px` is reserved for the
+settings panel, and `42px` is the effective task-row pitch used by the Slint
+list. Before GTK reports a positioned popup height, the app falls back to a
+conservative maximum of `20`.
 
 In the settings panel, this value is typed directly by the user and saved with
 `Enter`; valid values are from `1` to the detected runtime limit. Invalid

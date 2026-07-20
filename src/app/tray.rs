@@ -19,9 +19,12 @@ use gtk::glib::translate::{IntoGlib, from_glib};
 use gtk::prelude::*;
 use slint::{ComponentHandle, PhysicalPosition, Weak};
 
-use crate::app::settings::intelligent_visible_task_limit;
+use crate::app::settings::{
+    FALLBACK_MAX_VISIBLE_TASKS, intelligent_visible_task_limit,
+    intelligent_visible_task_limit_below_popup_top,
+};
 use crate::app::windows;
-use crate::ui::{MainWindow, apply_visible_task_limit};
+use crate::ui::{MainWindow, apply_visible_task_limit, apply_visible_task_limit_now};
 
 const TRAY_ICON_NAME: &str = "task-due";
 const TRAY_TOOLTIP: &str = "Taskbar Todolist";
@@ -403,11 +406,27 @@ fn runtime_visible_task_limit() -> i32 {
     let screen_height = default_screen_height();
     let visible_task_limit = screen_height
         .map(intelligent_visible_task_limit)
-        .unwrap_or(crate::app::settings::FALLBACK_MAX_VISIBLE_TASKS);
+        .unwrap_or(FALLBACK_MAX_VISIBLE_TASKS);
     tracing::debug!(
         screen_height,
         visible_task_limit,
         "computed intelligent visible task limit"
+    );
+    visible_task_limit
+}
+
+fn visible_task_limit_for_popup_position(position: Option<PhysicalPosition>) -> i32 {
+    let Some(screen_height) = default_screen_height() else {
+        return FALLBACK_MAX_VISIBLE_TASKS;
+    };
+    let popup_top = position.map(|position| position.y).unwrap_or(0);
+    let visible_task_limit =
+        intelligent_visible_task_limit_below_popup_top(screen_height, popup_top);
+    tracing::debug!(
+        screen_height,
+        popup_top,
+        visible_task_limit,
+        "computed positioned visible task limit"
     );
     visible_task_limit
 }
@@ -454,6 +473,7 @@ fn toggle_panel_at(window: Weak<MainWindow>, anchor: Option<ScreenPoint>) {
 
 fn show_panel(window: &MainWindow, anchor: Option<ScreenPoint>) {
     let position = anchor.map(popup_position_from_anchor);
+    apply_visible_task_limit_now(window, visible_task_limit_for_popup_position(position));
     tracing::debug!(?anchor, ?position, "showing slint panel");
 
     let _ = window.show();
@@ -577,6 +597,11 @@ mod tests {
 
     #[test]
     fn runtime_limit_uses_screen_height_divided_by_task_row_height() {
-        assert_eq!(intelligent_visible_task_limit(1080), 25);
+        assert_eq!(intelligent_visible_task_limit(1080), 20);
+    }
+
+    #[test]
+    fn positioned_runtime_limit_accounts_for_panel_y_offset() {
+        assert_eq!(intelligent_visible_task_limit_below_popup_top(1080, 36), 19);
     }
 }

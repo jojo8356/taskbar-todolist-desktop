@@ -595,24 +595,30 @@ pub fn apply_visible_task_limit(window: slint::Weak<MainWindow>, visible_task_li
     tracing::trace!(visible_task_limit, "apply_visible_task_limit");
     let _ = slint::invoke_from_event_loop(move || {
         if let Some(window) = window.upgrade() {
-            window.set_visible_task_limit(visible_task_limit);
-            window.set_visible_task_limit_text(visible_task_limit_text(visible_task_limit).into());
-
-            let visible_tasks = normalize_visible_tasks(
-                window.get_visible_task_count(),
-                window.get_visible_task_limit(),
-            );
-            window.set_visible_task_count(visible_tasks);
-            window.set_visible_task_count_text(visible_tasks.to_string().into());
-
-            let settings = AppSettings {
-                language: AppLanguage::from_ui_code(window.get_language().as_str())
-                    .unwrap_or(AppLanguage::Fr),
-                visible_tasks,
-            };
-            let _ = save_settings(&settings, visible_task_limit, "apply_visible_task_limit");
+            apply_visible_task_limit_now(&window, visible_task_limit);
         }
     });
+}
+
+/// Applies a row limit immediately. Call only from the Slint event loop.
+pub fn apply_visible_task_limit_now(window: &MainWindow, visible_task_limit: i32) {
+    let visible_task_limit = visible_task_limit.max(MIN_VISIBLE_TASKS);
+    window.set_visible_task_limit(visible_task_limit);
+    window.set_visible_task_limit_text(visible_task_limit_text(visible_task_limit).into());
+
+    let visible_tasks = normalize_visible_tasks(
+        window.get_visible_task_count(),
+        window.get_visible_task_limit(),
+    );
+    window.set_visible_task_count(visible_tasks);
+    window.set_visible_task_count_text(visible_tasks.to_string().into());
+
+    let settings = AppSettings {
+        language: AppLanguage::from_ui_code(window.get_language().as_str())
+            .unwrap_or(AppLanguage::Fr),
+        visible_tasks,
+    };
+    let _ = save_settings(&settings, visible_task_limit, "apply_visible_task_limit");
 }
 
 fn to_task_rows(tasks: Vec<Task>) -> Vec<TaskRow> {

@@ -78,9 +78,13 @@ is not fixed: once GTK initializes, the tray layer reads the current screen
 height and computes:
 
 ```text
-visible task limit = screen height / 42px
+visible task limit = (screen height - popup top - 12px bottom gap - 116px header/footer - 94px settings panel) / 42px
 ```
 
+`popup top` is the real y-position where the popup opens below the desktop panel.
+`12px` leaves a small bottom safety gap. `116px` is the fixed space around the
+list: top input, bottom action row, padding, and gaps. `94px` is reserved for
+the settings panel so opening settings does not push the popup below the screen.
 `42px` is the effective Slint task-row pitch: 34px row height plus layout
 spacing. If GTK cannot report the screen height, the app uses the fallback
 maximum of `20`.
@@ -88,6 +92,9 @@ maximum of `20`.
 Implementation anchors:
 
 - `TASK_ROW_HEIGHT_PX` in `src/app/settings.rs`
+- `POPUP_HEADER_FOOTER_HEIGHT_PX` in `src/app/settings.rs`
+- `SETTINGS_PANEL_HEIGHT_PX` in `src/app/settings.rs`
+- `POPUP_SCREEN_BOTTOM_GAP_PX` in `src/app/settings.rs`
 - `intelligent_visible_task_limit()` in `src/app/settings.rs`
 - `runtime_visible_task_limit()` in `src/app/tray.rs`
 - `apply_visible_task_limit()` in `src/ui/mod.rs`
@@ -193,8 +200,8 @@ make clean-dist package
 Expected outputs:
 
 ```text
-dist/taskbar-todolist-desktop_0.1.0_amd64.deb
-dist/taskbar-todolist-desktop-0.1.0-x86_64.AppImage
+dist/taskbar-todolist-desktop_0.1.1_amd64.deb
+dist/taskbar-todolist-desktop-0.1.1-x86_64.AppImage
 ```
 
 The AppImage target requires `appimagetool` in `PATH`, or:
