@@ -19,18 +19,18 @@ support.
 
 ```mermaid
 sequenceDiagram
-    participant Main as main.rs
-    participant State as AppState
-    participant UI as Slint MainWindow
-    participant Tray as GTK tray thread
-    participant DB as SQLite
+    participant Main as "main.rs"
+    participant State as "AppState"
+    participant UI as "Slint MainWindow"
+    participant Tray as "GTK tray thread"
+    participant DB as "SQLite"
 
     Main->>State: load settings and task service
     State->>DB: open database and run migrations
     Main->>UI: create hidden frameless popup
     Main->>Tray: start GTK tray thread
     Tray->>Tray: gtk::init()
-    Tray->>UI: apply screen-height task limit
+    Tray->>UI: apply screen height task limit
     Main->>UI: enter Slint event loop
     Tray->>UI: tray click toggles popup
 ```

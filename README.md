@@ -228,12 +228,12 @@ non-integer input is rejected and the previous valid value is restored.
 
 ```mermaid
 flowchart LR
-    Tray[GTK tray/status icon] --> UI[Slint popup window]
-    UI --> Service[Task service]
-    Service --> Repository[Task repository]
-    Repository --> SQLite[(SQLite database)]
-    App[App lifecycle] --> Tray
-    App --> Notifications[notify-send startup notification]
+    Tray["GTK tray and status icon"] --> UI["Slint popup window"]
+    UI --> Service["Task service"]
+    Service --> Repository["Task repository"]
+    Repository --> SQLite[("SQLite database")]
+    App["App lifecycle"] --> Tray
+    App --> Notifications["notify-send startup notification"]
 ```
 
 Main module layout:
