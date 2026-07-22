@@ -51,6 +51,7 @@ jobs:
           msystem: MINGW64
           update: true
           install: >-
+            pkgconf
             mingw-w64-x86_64-gcc
             mingw-w64-x86_64-gtk3
             mingw-w64-x86_64-pkgconf
@@ -60,11 +61,31 @@ jobs:
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
+          $pkgConfig = @(
+            "C:/msys64/mingw64/bin/pkg-config.exe",
+            "C:/msys64/mingw64/bin/pkgconf.exe",
+            "C:/msys64/usr/bin/pkg-config.exe",
+            "C:/msys64/usr/bin/pkgconf.exe"
+          ) | Where-Object { Test-Path $_ } | Select-Object -First 1
+          if (-not $pkgConfig) {
+            Get-ChildItem C:/msys64 -Recurse -Filter "pkg*.exe" | Select-Object -ExpandProperty FullName
+            throw "pkg-config/pkgconf executable was not found in MSYS2"
+          }
+
+          $linker = @(
+            "C:/msys64/mingw64/bin/x86_64-w64-mingw32-gcc.exe",
+            "C:/msys64/mingw64/bin/gcc.exe"
+          ) | Where-Object { Test-Path $_ } | Select-Object -First 1
+          if (-not $linker) {
+            Get-ChildItem C:/msys64/mingw64/bin -Filter "*gcc*.exe" | Select-Object -ExpandProperty FullName
+            throw "MinGW GCC linker was not found in MSYS2"
+          }
+
           "C:/msys64/mingw64/bin" | Out-File -FilePath $env:GITHUB_PATH -Append
           "C:/msys64/usr/bin" | Out-File -FilePath $env:GITHUB_PATH -Append
-          "CARGO_TARGET_X86_64_PC_WINDOWS_GNU_LINKER=x86_64-w64-mingw32-gcc" | Out-File -FilePath $env:GITHUB_ENV -Append
-          "PKG_CONFIG=C:/msys64/mingw64/bin/pkg-config.exe" | Out-File -FilePath $env:GITHUB_ENV -Append
-          "TARGET_PKG_CONFIG=C:/msys64/mingw64/bin/pkg-config.exe" | Out-File -FilePath $env:GITHUB_ENV -Append
+          "CARGO_TARGET_X86_64_PC_WINDOWS_GNU_LINKER=$linker" | Out-File -FilePath $env:GITHUB_ENV -Append
+          "PKG_CONFIG=$pkgConfig" | Out-File -FilePath $env:GITHUB_ENV -Append
+          "TARGET_PKG_CONFIG=$pkgConfig" | Out-File -FilePath $env:GITHUB_ENV -Append
           "PKG_CONFIG_ALLOW_CROSS=1" | Out-File -FilePath $env:GITHUB_ENV -Append
           "TARGET_PKG_CONFIG_ALLOW_CROSS=1" | Out-File -FilePath $env:GITHUB_ENV -Append
           "PKG_CONFIG_PATH=C:/msys64/mingw64/lib/pkgconfig" | Out-File -FilePath $env:GITHUB_ENV -Append
@@ -76,7 +97,7 @@ jobs:
         run: |
           Test-Path $env:PKG_CONFIG
           & $env:PKG_CONFIG --version
-          & C:/msys64/mingw64/bin/x86_64-w64-mingw32-gcc.exe --version
+          & $env:CARGO_TARGET_X86_64_PC_WINDOWS_GNU_LINKER --version
 
       - name: Install Rust
         if: runner.os != 'Windows'
