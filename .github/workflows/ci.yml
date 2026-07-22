@@ -1,0 +1,116 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - "v*"
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+    name: Build ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: macOS
+            os: macos-latest
+            artifact_name: taskbar-todolist-desktop-macos
+            binary_path: target/release/taskbar-todolist-desktop
+            cargo_target: ""
+            cargo_target_arg: ""
+          - name: Windows
+            os: windows-latest
+            artifact_name: taskbar-todolist-desktop-windows
+            binary_path: target/x86_64-pc-windows-gnu/release/taskbar-todolist-desktop.exe
+            cargo_target: x86_64-pc-windows-gnu
+            cargo_target_arg: --target x86_64-pc-windows-gnu
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install macOS native dependencies
+        if: runner.os == 'macOS'
+        run: brew install gtk+3 pkg-config sqlite
+
+      - name: Install Windows native dependencies
+        if: runner.os == 'Windows'
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: MINGW64
+          update: true
+          install: >-
+            mingw-w64-x86_64-gcc
+            mingw-w64-x86_64-gtk3
+            mingw-w64-x86_64-pkgconf
+            mingw-w64-x86_64-sqlite3
+
+      - name: Configure Windows native dependency paths
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          "C:\msys64\mingw64\bin" | Out-File -FilePath $env:GITHUB_PATH -Append
+          "PKG_CONFIG_ALLOW_CROSS=1" | Out-File -FilePath $env:GITHUB_ENV -Append
+          "PKG_CONFIG_PATH=C:\msys64\mingw64\lib\pkgconfig" | Out-File -FilePath $env:GITHUB_ENV -Append
+
+      - name: Install Rust
+        if: runner.os != 'Windows'
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+
+      - name: Install Rust for Windows GNU
+        if: runner.os == 'Windows'
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+          targets: ${{ matrix.cargo_target }}
+
+      - name: Cache Cargo
+        uses: Swatinem/rust-cache@v2
+
+      - name: Check formatting
+        run: cargo fmt --all -- --check
+
+      - name: Run Clippy
+        run: cargo clippy --all-targets --locked ${{ matrix.cargo_target_arg }}
+
+      - name: Build release
+        run: cargo build --release --locked ${{ matrix.cargo_target_arg }}
+
+      - name: Upload binary artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact_name }}
+          path: ${{ matrix.binary_path }}
+          if-no-files-found: error
+
+  release:
+    name: Publish GitHub Release
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: release-artifacts
+
+      - name: Publish release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: release-artifacts/**/*
