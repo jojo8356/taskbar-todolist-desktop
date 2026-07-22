@@ -49,55 +49,15 @@ jobs:
         uses: msys2/setup-msys2@v2
         with:
           msystem: MINGW64
+          path-type: inherit
           update: true
           install: >-
-            pkgconf
-            mingw-w64-x86_64-gcc
-            mingw-w64-x86_64-gtk3
-            mingw-w64-x86_64-pkgconf
-            mingw-w64-x86_64-sqlite3
-
-      - name: Configure Windows native dependency paths
-        if: runner.os == 'Windows'
-        shell: pwsh
-        run: |
-          $pkgConfig = @(
-            "C:/msys64/mingw64/bin/pkg-config.exe",
-            "C:/msys64/mingw64/bin/pkgconf.exe",
-            "C:/msys64/usr/bin/pkg-config.exe",
-            "C:/msys64/usr/bin/pkgconf.exe"
-          ) | Where-Object { Test-Path $_ } | Select-Object -First 1
-          if (-not $pkgConfig) {
-            Get-ChildItem C:/msys64 -Recurse -Filter "pkg*.exe" | Select-Object -ExpandProperty FullName
-            throw "pkg-config/pkgconf executable was not found in MSYS2"
-          }
-
-          $linker = @(
-            "C:/msys64/mingw64/bin/x86_64-w64-mingw32-gcc.exe",
-            "C:/msys64/mingw64/bin/gcc.exe"
-          ) | Where-Object { Test-Path $_ } | Select-Object -First 1
-          if (-not $linker) {
-            Get-ChildItem C:/msys64/mingw64/bin -Filter "*gcc*.exe" | Select-Object -ExpandProperty FullName
-            throw "MinGW GCC linker was not found in MSYS2"
-          }
-
-          "C:/msys64/mingw64/bin" | Out-File -FilePath $env:GITHUB_PATH -Append
-          "C:/msys64/usr/bin" | Out-File -FilePath $env:GITHUB_PATH -Append
-          "CARGO_TARGET_X86_64_PC_WINDOWS_GNU_LINKER=$linker" | Out-File -FilePath $env:GITHUB_ENV -Append
-          "PKG_CONFIG=$pkgConfig" | Out-File -FilePath $env:GITHUB_ENV -Append
-          "TARGET_PKG_CONFIG=$pkgConfig" | Out-File -FilePath $env:GITHUB_ENV -Append
-          "PKG_CONFIG_ALLOW_CROSS=1" | Out-File -FilePath $env:GITHUB_ENV -Append
-          "TARGET_PKG_CONFIG_ALLOW_CROSS=1" | Out-File -FilePath $env:GITHUB_ENV -Append
-          "PKG_CONFIG_PATH=C:/msys64/mingw64/lib/pkgconfig" | Out-File -FilePath $env:GITHUB_ENV -Append
-          "TARGET_PKG_CONFIG_PATH=C:/msys64/mingw64/lib/pkgconfig" | Out-File -FilePath $env:GITHUB_ENV -Append
-
-      - name: Verify Windows native tools
-        if: runner.os == 'Windows'
-        shell: pwsh
-        run: |
-          Test-Path $env:PKG_CONFIG
-          & $env:PKG_CONFIG --version
-          & $env:CARGO_TARGET_X86_64_PC_WINDOWS_GNU_LINKER --version
+            base-devel
+          pacboy: >-
+            toolchain:p
+            gtk3:p
+            pkgconf:p
+            sqlite3:p
 
       - name: Install Rust
         if: runner.os != 'Windows'
@@ -112,16 +72,52 @@ jobs:
           components: rustfmt, clippy
           targets: ${{ matrix.cargo_target }}
 
+      - name: Configure and verify Windows native tools
+        if: runner.os == 'Windows'
+        shell: msys2 {0}
+        run: |
+          echo "CARGO_TARGET_X86_64_PC_WINDOWS_GNU_LINKER=gcc" >> "$GITHUB_ENV"
+          echo "PKG_CONFIG=pkg-config" >> "$GITHUB_ENV"
+          echo "TARGET_PKG_CONFIG=pkg-config" >> "$GITHUB_ENV"
+          echo "PKG_CONFIG_ALLOW_CROSS=1" >> "$GITHUB_ENV"
+          echo "TARGET_PKG_CONFIG_ALLOW_CROSS=1" >> "$GITHUB_ENV"
+          echo "PKG_CONFIG_PATH=/mingw64/lib/pkgconfig" >> "$GITHUB_ENV"
+          echo "TARGET_PKG_CONFIG_PATH=/mingw64/lib/pkgconfig" >> "$GITHUB_ENV"
+          which cargo
+          which gcc
+          which pkg-config
+          pkg-config --version
+          pkg-config --modversion glib-2.0
+          gcc --version
+
       - name: Cache Cargo
         uses: Swatinem/rust-cache@v2
 
       - name: Check formatting
+        if: runner.os != 'Windows'
+        run: cargo fmt --all -- --check
+
+      - name: Check formatting on Windows
+        if: runner.os == 'Windows'
+        shell: msys2 {0}
         run: cargo fmt --all -- --check
 
       - name: Run Clippy
+        if: runner.os != 'Windows'
+        run: cargo clippy --all-targets --locked ${{ matrix.cargo_target_arg }}
+
+      - name: Run Clippy on Windows
+        if: runner.os == 'Windows'
+        shell: msys2 {0}
         run: cargo clippy --all-targets --locked ${{ matrix.cargo_target_arg }}
 
       - name: Build release
+        if: runner.os != 'Windows'
+        run: cargo build --release --locked ${{ matrix.cargo_target_arg }}
+
+      - name: Build release on Windows
+        if: runner.os == 'Windows'
+        shell: msys2 {0}
         run: cargo build --release --locked ${{ matrix.cargo_target_arg }}
 
       - name: Upload binary artifact
