@@ -6,7 +6,21 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
+  "keywords": [
+    "rust",
+    "linux-desktop",
+    "tray-app",
+    "taskbar",
+    "todo",
+    "todolist",
+    "slint",
+    "gtk",
+    "sqlite",
+    "sqlx",
+    "notifications",
+    "appindicator",
+    "yaml"
+  ],
   "author": "",
   "license": "ISC",
   "devEngines": {
